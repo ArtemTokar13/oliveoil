@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Eliminar dirección — {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-lg px-4 py-16 sm:px-6 lg:px-8">
+  <h1 class="font-display text-2xl font-semibold tracking-tight text-ink">¿Eliminar esta dirección?</h1>
+  <div class="mt-4 border border-border p-4 text-sm text-ink-muted">
+    <p class="font-medium text-ink">{{ address.full_name }}</p>
+    <p>{{ address.street_address }}, {{ address.postal_code }} {{ address.city }}</p>
+  </div>
+  <form method="post" class="mt-6 flex gap-3">
+    {% csrf_token %}
+    <button type="submit" class="btn-primary">Eliminar</button>
+    <a href="{% url 'accounts:address_list' %}" class="btn-ghost">Cancelar</a>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% if page_obj.paginator.num_pages > 1 %}
+  <nav class="mt-12 flex items-center justify-center gap-2" aria-label="Paginación">
+    {% if page_obj.has_previous %}
+      <a href="?{% if selected_category %}categoria={{ selected_category }}&{% endif %}{% if selected_brand %}marca={{ selected_brand }}&{% endif %}page={{ page_obj.previous_page_number }}"
+         class="btn-secondary">Anterior</a>
+    {% endif %}
+    <span class="px-3 font-mono text-sm text-ink-muted">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+      <a href="?{% if selected_category %}categoria={{ selected_category }}&{% endif %}{% if selected_brand %}marca={{ selected_brand }}&{% endif %}page={{ page_obj.next_page_number }}"
+         class="btn-secondary">Siguiente</a>
+    {% endif %}
+  </nav>
+{% endif %}

@@ -1,0 +1,11 @@
+{% autoescape off %}Hola,
+
+Tu código de acceso a {{ SITE_NAME }} es:
+
+{{ code }}
+
+Caduca en {{ valid_minutes }} minutos y solo se puede usar una vez. Si no has
+solicitado este código, puedes ignorar este correo.
+
+— {{ SITE_NAME }}
+{% endautoescape %}

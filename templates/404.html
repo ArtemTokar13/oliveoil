@@ -1,0 +1,19 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Página no encontrada — Olivarium</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bitter:wght@600&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/output.css' %}">
+</head>
+<body class="flex min-h-screen flex-col items-center justify-center bg-bg px-4 text-center font-sans text-ink">
+  <p class="font-mono text-sm uppercase tracking-[0.2em] text-accent">Error 404</p>
+  <h1 class="mt-3 font-display text-3xl font-semibold sm:text-4xl">No hemos encontrado esta página</h1>
+  <p class="mt-3 max-w-md text-ink-muted">
+    Puede que el enlace esté roto o que el producto ya no esté disponible.
+  </p>
+  <a href="/" class="btn-primary mt-8 inline-flex">Volver a la tienda</a>
+</body>
+</html>

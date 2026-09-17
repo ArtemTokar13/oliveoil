@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load shop_extras %}
+
+{% block title %}Mis pedidos — {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
+  <h1 class="font-display text-2xl font-semibold tracking-tight text-ink sm:text-3xl">Mis pedidos</h1>
+
+  {% if orders %}
+    <div class="mt-8 divide-y divide-border border-y border-border">
+      {% for order in orders %}
+        <a href="{{ order.get_absolute_url }}" class="flex flex-wrap items-center justify-between gap-3 py-5 hover:bg-surface-2/40">
+          <div>
+            <p class="font-medium text-ink">Pedido #{{ order.id }}</p>
+            <p class="text-sm text-ink-muted">{{ order.created_at|date:"d \d\e F \d\e Y" }}</p>
+          </div>
+          <span class="badge
+            {% if order.status == 'PAID' %}border-accent-2 text-accent-2
+            {% elif order.status == 'CANCELLED' %}border-ink-muted text-ink-muted
+            {% else %}border-accent text-accent{% endif %}">
+            {{ order.get_status_display }}
+          </span>
+          <p class="price font-medium text-ink">{{ order.total|eur }}</p>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="mt-10 border border-dashed border-border px-6 py-16 text-center">
+      <p class="text-ink-muted">Todavía no has hecho ningún pedido.</p>
+      <a href="{% url 'catalog:home' %}" class="btn-primary mt-4 inline-flex">Ver productos</a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

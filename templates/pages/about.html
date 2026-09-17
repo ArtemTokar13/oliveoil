@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Sobre nosotros — {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
+  <p class="font-mono text-xs uppercase tracking-[0.2em] text-accent">Nuestra historia</p>
+  <h1 class="mt-2 font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">Sobre nosotros</h1>
+
+  <div class="mt-8 space-y-5 text-ink-muted">
+    <p>
+      En {{ SITE_NAME }} seleccionamos aceite de oliva de productores y cooperativas de distintas
+      regiones de España. No trabajamos con un único origen: buscamos variedades, grados y formatos
+      que muestren la diversidad del olivar español, desde ecológicos de producción limitada hasta
+      vírgenes extra de cooperativas con generaciones de experiencia.
+    </p>
+    <p>
+      Cada producto de nuestro catálogo se elige por su calidad y trazabilidad — región de origen,
+      cosecha y, cuando está disponible, grado de acidez — para que sepas exactamente qué estás
+      comprando.
+    </p>
+    <p>
+      Nuestro catálogo crece con el tiempo, incorporando nuevos productores a medida que los
+      encontramos. Lo que no cambia es el criterio: aceite de oliva español, cuidadosamente
+      seleccionado.
+    </p>
+  </div>
+</section>
+{% endblock %}

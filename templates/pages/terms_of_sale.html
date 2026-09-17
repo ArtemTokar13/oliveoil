@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Términos y condiciones de venta — {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
+  <h1 class="font-display text-3xl font-semibold tracking-tight text-ink">Términos y condiciones de venta</h1>
+
+  <div class="mt-10 space-y-8 text-ink-muted">
+    <div>
+      <h2 class="font-display text-lg font-semibold text-ink">1. Objeto y ámbito</h2>
+      <p class="mt-3">
+        Estas condiciones regulan la compra de productos a través de {{ SITE_NAME }}, operado
+        por {{ SITE_LEGAL_NAME }} (NIF {{ SITE_NIF }}). La venta se dirige a consumidores con
+        dirección de envío en España.
+      </p>
+    </div>
+
+    <div>
+      <h2 class="font-display text-lg font-semibold text-ink">2. Precios e impuestos</h2>
+      <p class="mt-3">
+        Todos los precios se muestran en euros (EUR) e incluyen el IVA aplicable. Los gastos
+        de envío se indican de forma separada antes de confirmar el pedido.
+      </p>
+    </div>
+
+    <div>
+      <h2 class="font-display text-lg font-semibold text-ink">3. Proceso de compra y pago</h2>
+      <p class="mt-3">
+        El pedido se confirma una vez completado el pago a través de Stripe Checkout, que
+        admite tarjeta de crédito y débito. El contrato de compraventa se entiende
+        perfeccionado cuando recibimos la confirmación de pago.
+      </p>
+    </div>
+
+    <div>
+      <h2 class="font-display text-lg font-semibold text-ink">4. Derecho de desistimiento</h2>
+      <p class="mt-3">
+        De acuerdo con el artículo 102 del Real Decreto Legislativo 1/2007, dispones de un
+        plazo de <strong class="text-ink">14 días naturales</strong> desde la recepción del
+        pedido para desistir de la compra sin necesidad de justificación, salvo en el caso
+        de productos precintados que no sean aptos para ser devueltos por razones de
+        protección de la salud o higiene y que hayan sido desprecintados tras la entrega.
+        Para ejercer este derecho, contacta con nosotros en {{ SITE_EMAIL }}.
+      </p>
+    </div>
+
+    <div>
+      <h2 class="font-display text-lg font-semibold text-ink">5. Garantías</h2>
+      <p class="mt-3">
+        Todos nuestros productos cuentan con la garantía legal de conformidad prevista en la
+        normativa de consumidores y usuarios.
+      </p>
+    </div>
+
+    <div>
+      <h2 class="font-display text-lg font-semibold text-ink">6. Resolución de conflictos</h2>
+      <p class="mt-3">
+        Puedes acceder a la plataforma europea de resolución de litigios en línea en
+        ec.europa.eu/consumers/odr. Para cualquier controversia, las partes se someten a los
+        juzgados y tribunales del domicilio del consumidor.
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}

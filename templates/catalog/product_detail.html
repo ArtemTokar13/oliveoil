@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% load shop_extras %}
+
+{% block title %}{{ product.name }} — {{ SITE_NAME }}{% endblock %}
+{% block meta_description %}{{ product.name }}, {{ product.get_volume_display }}. {{ product.description|truncatewords:25 }}{% endblock %}
+
+{% block content %}
+<nav class="mx-auto max-w-7xl px-4 py-4 text-sm text-ink-muted sm:px-6 lg:px-8">
+  <a href="{% url 'catalog:home' %}" class="hover:text-accent">Tienda</a>
+  <span class="mx-1.5">/</span>
+  <span class="text-ink">{{ product.name }}</span>
+</nav>
+
+<section class="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
+  <div class="grid gap-10 lg:grid-cols-2">
+
+    <div x-data="{ active: 0 }">
+      <div class="aspect-square border border-border bg-surface-2">
+        {% with images=product.images.all %}
+          {% if images %}
+            {% for image in images %}
+              <img x-show="active === {{ forloop.counter0 }}" {% if not forloop.first %}x-cloak{% endif %}
+                   src="{{ image.image.url }}" alt="{{ image.alt_text|default:product.name }}"
+                   class="h-full w-full object-cover">
+            {% endfor %}
+          {% else %}
+            <div class="flex h-full w-full items-center justify-center">
+              <span class="font-display text-lg text-ink-muted">{{ product.name }}</span>
+            </div>
+          {% endif %}
+        {% endwith %}
+      </div>
+      {% if product.images.all|length > 1 %}
+        <div class="mt-3 flex gap-2">
+          {% for image in product.images.all %}
+            <button type="button" @click="active = {{ forloop.counter0 }}"
+                    class="h-16 w-16 shrink-0 border border-border" :class="active === {{ forloop.counter0 }} && 'border-accent'">
+              <img src="{{ image.image.url }}" alt="" class="h-full w-full object-cover">
+            </button>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    <div>
+      {% if product.brand %}
+        <p class="text-sm uppercase tracking-wide text-ink-muted">{{ product.brand.name }}</p>
+      {% endif %}
+      <h1 class="mt-1 font-display text-3xl font-semibold tracking-tight text-ink">{{ product.name }}</h1>
+
+      <div class="mt-3 flex items-center gap-3">
+        <p class="price text-2xl font-medium text-ink">{{ product.price|eur }}</p>
+        {% if product.in_stock %}
+          <span class="badge border-accent-2 text-accent-2">En stock</span>
+        {% else %}
+          <span class="badge border-red-700 text-red-700 dark:border-red-400 dark:text-red-400">Agotado</span>
+        {% endif %}
+      </div>
+
+      <dl class="mt-6 grid grid-cols-2 gap-x-6 gap-y-3 border-y border-border py-6 text-sm">
+        <div>
+          <dt class="text-ink-muted">Categoría</dt>
+          <dd class="mt-0.5 font-medium text-ink">{{ product.category.name }}</dd>
+        </div>
+        <div>
+          <dt class="text-ink-muted">Volumen</dt>
+          <dd class="mt-0.5 font-mono font-medium text-ink">{{ product.get_volume_display }}</dd>
+        </div>
+        {% if product.origin_region %}
+          <div>
+            <dt class="text-ink-muted">Origen</dt>
+            <dd class="mt-0.5 font-medium text-ink">{{ product.origin_region }}</dd>
+          </div>
+        {% endif %}
+        {% if product.harvest_year %}
+          <div>
+            <dt class="text-ink-muted">Cosecha</dt>
+            <dd class="mt-0.5 font-mono font-medium text-ink">{{ product.harvest_year }}</dd>
+          </div>
+        {% endif %}
+        {% if product.acidity %}
+          <div>
+            <dt class="text-ink-muted">Acidez</dt>
+            <dd class="mt-0.5 font-mono font-medium text-ink">{{ product.acidity }}%</dd>
+          </div>
+        {% endif %}
+      </dl>
+
+      {% if product.description %}
+        <div class="mt-6 space-y-3 text-ink-muted">
+          {{ product.description|linebreaks }}
+        </div>
+      {% endif %}
+
+      <div class="mt-8 space-y-3" x-data="{ quantity: 1, maxQty: {{ product.stock }} }">
+        <div class="flex items-center gap-4">
+          <div class="flex items-center border border-border">
+            <button type="button" class="px-3 py-2 text-ink hover:text-accent disabled:opacity-40"
+                    @click="quantity = Math.max(1, quantity - 1)" :disabled="quantity <= 1" aria-label="Restar unidad">−</button>
+            <span class="w-10 text-center font-mono" x-text="quantity" id="quantity-display"></span>
+            <button type="button" class="px-3 py-2 text-ink hover:text-accent disabled:opacity-40"
+                    @click="quantity = Math.min(maxQty, quantity + 1)" :disabled="quantity >= maxQty" aria-label="Sumar unidad">+</button>
+          </div>
+        </div>
+
+        <form method="post" action="{% url 'cart:add' %}" class="flex flex-col gap-3 sm:flex-row"
+              x-data="{ loading: false, toast: false }"
+              @submit.prevent="
+                loading = true;
+                fetch($event.target.action, { method: 'POST', body: new FormData($event.target), headers: { 'X-Requested-With': 'fetch' } })
+                  .then(r => r.json())
+                  .then(data => { if (data.ok) { $store.cart.count = data.cart_items_count; toast = true; setTimeout(() => toast = false, 3000); } })
+                  .finally(() => { loading = false; });
+              ">
+          {% csrf_token %}
+          <input type="hidden" name="product_id" value="{{ product.id }}">
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <input type="hidden" name="quantity" :value="quantity">
+          <button type="submit" class="btn-primary flex-1" :disabled="loading || !{{ product.in_stock|yesno:'true,false' }}">
+            Añadir al carrito
+          </button>
+          <p x-show="toast" x-transition x-cloak class="self-center text-sm text-accent-2">✓ Añadido al carrito</p>
+        </form>
+
+        <form method="post" action="{% url 'orders:buy_now' %}" x-data>
+          {% csrf_token %}
+          <input type="hidden" name="product_id" value="{{ product.id }}">
+          <input type="hidden" name="quantity" :value="quantity">
+          <button type="submit" class="btn-secondary w-full" {% if not product.in_stock %}disabled{% endif %}>
+            Comprar ahora
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  {% if related %}
+    <div class="mt-16 border-t border-border pt-10">
+      <h2 class="font-display text-xl font-semibold text-ink">También te puede interesar</h2>
+      <div class="mt-6 grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-4">
+        {% for product in related %}
+          {% include "catalog/_product_card.html" %}
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

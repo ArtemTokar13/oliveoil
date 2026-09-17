@@ -1,0 +1,48 @@
+{% load shop_extras %}
+<div>
+  <label for="full_name" class="field-label">Nombre completo</label>
+  <input type="text" name="full_name" id="full_name" value="{{ values.full_name|default:'' }}" class="field-input">
+  {% if errors.full_name %}<p class="field-error">{{ errors.full_name }}</p>{% endif %}
+</div>
+<div>
+  <label for="phone" class="field-label">Teléfono</label>
+  <input type="tel" name="phone" id="phone" value="{{ values.phone|default:'' }}" class="field-input">
+  {% if errors.phone %}<p class="field-error">{{ errors.phone }}</p>{% endif %}
+</div>
+<div class="sm:col-span-2">
+  <label for="street_address" class="field-label">Dirección</label>
+  <input type="text" name="street_address" id="street_address" value="{{ values.street_address|default:'' }}" class="field-input">
+  {% if errors.street_address %}<p class="field-error">{{ errors.street_address }}</p>{% endif %}
+</div>
+<div class="sm:col-span-2">
+  <label for="apartment" class="field-label">Piso / puerta (opcional)</label>
+  <input type="text" name="apartment" id="apartment" value="{{ values.apartment|default:'' }}" class="field-input">
+</div>
+<div>
+  <label for="postal_code" class="field-label">Código postal</label>
+  <input type="text" inputmode="numeric" name="postal_code" id="postal_code" value="{{ values.postal_code|default:'' }}" class="field-input">
+  {% if errors.postal_code %}<p class="field-error">{{ errors.postal_code }}</p>{% endif %}
+</div>
+<div>
+  <label for="city" class="field-label">Ciudad</label>
+  <input type="text" name="city" id="city" value="{{ values.city|default:'' }}" class="field-input">
+  {% if errors.city %}<p class="field-error">{{ errors.city }}</p>{% endif %}
+</div>
+<div>
+  <label for="province" class="field-label">Provincia</label>
+  <input type="text" name="province" id="province" value="{{ values.province|default:'' }}" class="field-input">
+  {% if errors.province %}<p class="field-error">{{ errors.province }}</p>{% endif %}
+</div>
+<div>
+  <label for="country" class="field-label">País</label>
+  <input type="text" id="country" value="España" class="field-input" disabled>
+  <p class="mt-1 text-xs text-ink-muted">Por ahora solo enviamos a España.</p>
+</div>
+{% if show_default_checkbox|default:True %}
+<div class="sm:col-span-2">
+  <label class="flex items-center gap-2 text-sm text-ink">
+    <input type="checkbox" name="is_default" {% if values.is_default %}checked{% endif %} class="accent-accent">
+    Usar como dirección predeterminada
+  </label>
+</div>
+{% endif %}

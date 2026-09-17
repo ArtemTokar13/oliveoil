@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Introduce tu código — {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-md px-4 py-16 sm:px-6 lg:px-8">
+  <h1 class="font-display text-2xl font-semibold tracking-tight text-ink">Introduce tu código</h1>
+  <p class="mt-2 text-sm text-ink-muted">
+    Hemos enviado un código de 6 dígitos a <strong class="text-ink">{{ email }}</strong>.
+    Caduca en unos minutos.
+  </p>
+
+  {% if error %}
+    <div class="mt-4 border border-red-700 bg-red-50 px-4 py-3 text-sm text-red-800 dark:bg-red-950 dark:text-red-100">
+      <p>{{ error }}</p>
+    </div>
+  {% endif %}
+
+  <form method="post" class="mt-8 space-y-4">
+    {% csrf_token %}
+    <div>
+      <label for="code" class="field-label">Código</label>
+      <input type="text" inputmode="numeric" autocomplete="one-time-code" name="code" id="code"
+             maxlength="6" pattern="[0-9]{6}" class="field-input text-center font-mono text-lg tracking-[0.3em]"
+             autofocus required>
+    </div>
+    <button type="submit" class="btn-primary w-full">Verificar</button>
+  </form>
+
+  <form method="post" action="{% url 'accounts:resend_login_code' %}" class="mt-4">
+    {% csrf_token %}
+    <button type="submit" class="text-sm text-accent hover:underline">Reenviar código</button>
+  </form>
+
+  <p class="mt-6 text-sm text-ink-muted">
+    <a href="{% url 'accounts:login' %}" class="hover:text-accent">Usar otro correo electrónico</a>
+  </p>
+</section>
+{% endblock %}

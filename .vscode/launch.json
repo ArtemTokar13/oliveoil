@@ -1,0 +1,47 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Django: runserver",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/manage.py",
+      "args": ["runserver", "127.0.0.1:8000", "--noreload"],
+      "django": true,
+      "justMyCode": true,
+      "python": "${workspaceFolder}/venv/bin/python",
+      "envFile": "${workspaceFolder}/.env",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Django: manage.py (prompt for command)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/manage.py",
+      "args": ["${input:manageCommand}"],
+      "django": true,
+      "justMyCode": true,
+      "python": "${workspaceFolder}/venv/bin/python",
+      "envFile": "${workspaceFolder}/.env",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Python: Current File",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "python": "${workspaceFolder}/venv/bin/python",
+      "envFile": "${workspaceFolder}/.env",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    }
+  ],
+  "inputs": [
+    {
+      "id": "manageCommand",
+      "type": "promptString",
+      "description": "manage.py command (e.g. \"shell\", \"seed_catalog\", \"makemigrations\")",
+      "default": "shell"
+    }
+  ]
+}

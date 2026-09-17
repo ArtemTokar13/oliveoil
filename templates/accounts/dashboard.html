@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load shop_extras %}
+
+{% block title %}Mi cuenta — {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
+  <h1 class="font-display text-2xl font-semibold tracking-tight text-ink sm:text-3xl">Mi cuenta</h1>
+  <p class="mt-1 text-ink-muted">Hola, {{ user.first_name|default:user.email }}.</p>
+
+  <div class="mt-8 grid gap-8 sm:grid-cols-2">
+    <div class="border border-border p-6">
+      <h2 class="font-display text-lg font-semibold text-ink">Perfil</h2>
+      <dl class="mt-3 space-y-1 text-sm">
+        <div class="flex justify-between"><dt class="text-ink-muted">Nombre</dt><dd class="text-ink">{{ user.first_name }} {{ user.last_name }}</dd></div>
+        <div class="flex justify-between"><dt class="text-ink-muted">Correo</dt><dd class="text-ink">{{ user.email }}</dd></div>
+      </dl>
+    </div>
+
+    <div class="border border-border p-6">
+      <div class="flex items-center justify-between">
+        <h2 class="font-display text-lg font-semibold text-ink">Direcciones</h2>
+        <a href="{% url 'accounts:address_list' %}" class="text-sm text-accent hover:underline">Gestionar</a>
+      </div>
+      {% if addresses %}
+        <p class="mt-3 text-sm text-ink-muted">
+          Tienes {{ addresses|length }} dirección{{ addresses|length|pluralize:"es" }} guardada{{ addresses|length|pluralize }}.
+        </p>
+      {% else %}
+        <p class="mt-3 text-sm text-ink-muted">Aún no has añadido ninguna dirección.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="mt-8 border border-border p-6">
+    <div class="flex items-center justify-between">
+      <h2 class="font-display text-lg font-semibold text-ink">Pedidos recientes</h2>
+      <a href="{% url 'orders:list' %}" class="text-sm text-accent hover:underline">Ver todos</a>
+    </div>
+    {% if orders %}
+      <div class="mt-3 divide-y divide-border">
+        {% for order in orders %}
+          <a href="{{ order.get_absolute_url }}" class="flex items-center justify-between py-3 text-sm hover:text-accent">
+            <span>Pedido #{{ order.id }} — {{ order.created_at|date:"d/m/Y" }}</span>
+            <span class="price">{{ order.total|eur }}</span>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="mt-3 text-sm text-ink-muted">Aún no has hecho ningún pedido.</p>
+    {% endif %}
+  </div>
+
+  <form method="post" action="{% url 'accounts:logout' %}" class="mt-8">
+    {% csrf_token %}
+    <button type="submit" class="btn-ghost">Cerrar sesión</button>
+  </form>
+</section>
+{% endblock %}

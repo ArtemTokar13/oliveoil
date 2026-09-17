@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Política de privacidad — {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
+  <h1 class="font-display text-3xl font-semibold tracking-tight text-ink">Política de privacidad</h1>
+  <p class="mt-2 text-sm text-ink-muted">
+    De acuerdo con el Reglamento (UE) 2016/679 (RGPD) y la Ley Orgánica 3/2018 (LOPDGDD).
+  </p>
+
+  <div class="mt-10 space-y-8 text-ink-muted">
+    <div>
+      <h2 class="font-display text-lg font-semibold text-ink">1. Responsable del tratamiento</h2>
+      <p class="mt-3">
+        {{ SITE_LEGAL_NAME }}, con NIF {{ SITE_NIF }} y domicilio en {{ SITE_ADDRESS }}, es el
+        responsable del tratamiento de los datos personales que nos facilites a través de
+        este sitio web. Puedes contactarnos en {{ SITE_EMAIL }}.
+      </p>
+    </div>
+
+    <div>
+      <h2 class="font-display text-lg font-semibold text-ink">2. Datos que tratamos y finalidad</h2>
+      <ul class="mt-3 list-disc space-y-2 pl-5">
+        <li><strong class="text-ink">Cuenta de usuario:</strong> nombre, apellidos y correo electrónico, para gestionar tu registro y acceso.</li>
+        <li><strong class="text-ink">Direcciones de envío:</strong> nombre, teléfono y dirección postal, para tramitar tus pedidos.</li>
+        <li><strong class="text-ink">Pedidos:</strong> historial de compras, para gestionar la relación contractual y atender garantías.</li>
+        <li><strong class="text-ink">Pagos:</strong> procesados directamente por Stripe; no almacenamos los datos de tu tarjeta.</li>
+        <li><strong class="text-ink">Formulario de contacto:</strong> nombre, correo y el contenido de tu mensaje, para responder a tu consulta.</li>
+      </ul>
+    </div>
+
+    <div>
+      <h2 class="font-display text-lg font-semibold text-ink">3. Base legal</h2>
+      <p class="mt-3">
+        Tratamos tus datos para la ejecución del contrato de compraventa (art. 6.1.b RGPD),
+        para el cumplimiento de obligaciones legales en materia fiscal y de consumo (art.
+        6.1.c RGPD), y con tu consentimiento en el caso del formulario de contacto (art.
+        6.1.a RGPD).
+      </p>
+    </div>
+
+    <div>
+      <h2 class="font-display text-lg font-semibold text-ink">4. Conservación</h2>
+      <p class="mt-3">
+        Conservamos tus datos mientras mantengas una cuenta activa y, posteriormente,
+        durante los plazos legalmente exigibles para atender responsabilidades fiscales y
+        de garantía.
+      </p>
+    </div>
+
+    <div>
+      <h2 class="font-display text-lg font-semibold text-ink">5. Destinatarios</h2>
+      <p class="mt-3">
+        Compartimos datos de pago con Stripe, Inc., como encargado del tratamiento para el
+        procesamiento seguro de pagos, y con empresas de transporte para la entrega de
+        pedidos. No cedemos tus datos a terceros con fines comerciales.
+      </p>
+    </div>
+
+    <div>
+      <h2 class="font-display text-lg font-semibold text-ink">6. Tus derechos</h2>
+      <p class="mt-3">
+        Puedes ejercer tus derechos de acceso, rectificación, supresión, oposición,
+        limitación y portabilidad escribiendo a {{ SITE_EMAIL }}, así como reclamar ante la
+        Agencia Española de Protección de Datos (aepd.es) si consideras que no hemos
+        atendido correctamente tu solicitud.
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}

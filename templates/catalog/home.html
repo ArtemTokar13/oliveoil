@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load shop_extras %}
+
+{% block content %}
+<section class="border-b border-border bg-surface">
+  <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <p class="font-mono text-xs uppercase tracking-[0.2em] text-accent">Aceite de oliva español</p>
+        <h1 class="mt-2 font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
+          Aceite seleccionado, cosecha a cosecha
+        </h1>
+        <p class="mt-2 max-w-xl text-ink-muted">
+          Trabajamos con productores y cooperativas de distintas regiones de España para
+          traerte variedades, grados y formatos distintos — sin atarnos a un único origen.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+  <form method="get" class="mb-8 flex flex-wrap items-end gap-4 border-b border-border pb-6">
+    <div>
+      <label for="categoria" class="field-label">Categoría</label>
+      <select id="categoria" name="categoria" onchange="this.form.submit()"
+              class="field-input min-w-[10rem]">
+        <option value="">Todas</option>
+        {% for category in categories %}
+          <option value="{{ category.slug }}" {% if category.slug == selected_category %}selected{% endif %}>
+            {{ category.name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label for="marca" class="field-label">Marca</label>
+      <select id="marca" name="marca" onchange="this.form.submit()"
+              class="field-input min-w-[10rem]">
+        <option value="">Todas</option>
+        {% for brand in brands %}
+          <option value="{{ brand.slug }}" {% if brand.slug == selected_brand %}selected{% endif %}>
+            {{ brand.name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    {% if selected_category or selected_brand %}
+      <a href="{% url 'catalog:home' %}" class="btn-ghost">Quitar filtros</a>
+    {% endif %}
+    <noscript><button type="submit" class="btn-secondary">Filtrar</button></noscript>
+  </form>
+
+  {% if products %}
+    <div class="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">
+      {% for product in products %}
+        {% include "catalog/_product_card.html" %}
+      {% endfor %}
+    </div>
+
+    {% include "includes/pagination.html" with page_obj=page_obj %}
+  {% else %}
+    <p class="border border-dashed border-border px-6 py-16 text-center text-ink-muted">
+      No hay productos disponibles con estos filtros por ahora.
+    </p>
+  {% endif %}
+</section>
+{% endblock %}

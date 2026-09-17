@@ -1,0 +1,74 @@
+{% load shop_extras %}
+<header class="sticky top-0 z-40 border-b border-border bg-surface/95 backdrop-blur">
+  <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+
+    <a href="{% url 'catalog:home' %}" class="font-display text-xl font-semibold tracking-tight text-ink">
+      {{ SITE_NAME }}
+    </a>
+
+    <nav class="hidden items-center gap-8 text-sm font-medium text-ink md:flex">
+      <a href="{% url 'catalog:home' %}" class="hover:text-accent">Tienda</a>
+      <a href="{% url 'pages:about' %}" class="hover:text-accent">Sobre nosotros</a>
+      <a href="{% url 'pages:contact' %}" class="hover:text-accent">Contacto</a>
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <a href="{% if user.is_authenticated %}{% url 'accounts:dashboard' %}{% else %}{% url 'accounts:login' %}{% endif %}"
+         class="hidden items-center gap-1.5 border border-transparent px-3 py-2 text-sm font-medium text-ink hover:border-border sm:inline-flex">
+        {% if user.is_authenticated %}Mi cuenta{% else %}Acceder{% endif %}
+      </a>
+
+      <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+        <button type="button" @click="open = !open"
+                class="relative inline-flex items-center gap-2 border border-border px-3 py-2 text-sm font-medium text-ink hover:border-accent"
+                aria-label="Ver carrito">
+          <span>Carrito</span>
+          <span x-text="$store.cart.count"
+                class="inline-flex min-w-[1.5rem] justify-center bg-accent px-1.5 py-0.5 font-mono text-xs font-medium text-bg">{{ cart_items_count }}</span>
+        </button>
+
+        <div x-show="open" x-transition x-cloak
+             class="absolute right-0 mt-2 w-80 border border-border bg-surface p-4 shadow-[0_8px_24px_-8px_rgba(0,0,0,0.25)]">
+          {% if mini_cart and mini_cart.items.all %}
+            <ul class="max-h-64 space-y-3 overflow-auto">
+              {% for item in mini_cart.items.all %}
+                <li class="flex items-center justify-between gap-3 text-sm">
+                  <span class="text-ink">{{ item.quantity }} × {{ item.product.name }}</span>
+                  <span class="price text-ink-muted">{{ item.line_total|eur }}</span>
+                </li>
+              {% endfor %}
+            </ul>
+            <div class="mt-3 flex items-center justify-between border-t border-border pt-3 text-sm font-medium">
+              <span>Subtotal</span>
+              <span class="price">{{ mini_cart.subtotal|eur }}</span>
+            </div>
+            <a href="{% url 'cart:detail' %}" class="btn-primary mt-3 w-full">Ver carrito</a>
+          {% else %}
+            <p class="text-sm text-ink-muted">Tu carrito está vacío.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <button type="button" class="inline-flex flex-col items-center justify-center gap-[5px] border border-border p-2.5 md:hidden"
+              @click="mobileNavOpen = !mobileNavOpen" :aria-expanded="mobileNavOpen" aria-label="Abrir menú">
+        <span class="block h-0.5 w-5 bg-ink transition-transform duration-150"
+              :class="mobileNavOpen && 'translate-y-[6.5px] rotate-45'"></span>
+        <span class="block h-0.5 w-5 bg-ink transition-opacity duration-150" :class="mobileNavOpen && 'opacity-0'"></span>
+        <span class="block h-0.5 w-5 bg-ink transition-transform duration-150"
+              :class="mobileNavOpen && '-translate-y-[6.5px] -rotate-45'"></span>
+        <span class="sr-only">Menú</span>
+      </button>
+    </div>
+  </div>
+
+  <nav x-show="mobileNavOpen" x-transition x-cloak class="border-t border-border bg-surface md:hidden">
+    <div class="space-y-1 px-4 py-3 text-sm font-medium">
+      <a href="{% url 'catalog:home' %}" class="block py-2">Tienda</a>
+      <a href="{% url 'pages:about' %}" class="block py-2">Sobre nosotros</a>
+      <a href="{% url 'pages:contact' %}" class="block py-2">Contacto</a>
+      <a href="{% if user.is_authenticated %}{% url 'accounts:dashboard' %}{% else %}{% url 'accounts:login' %}{% endif %}" class="block py-2">
+        {% if user.is_authenticated %}Mi cuenta{% else %}Acceder{% endif %}
+      </a>
+    </div>
+  </nav>
+</header>

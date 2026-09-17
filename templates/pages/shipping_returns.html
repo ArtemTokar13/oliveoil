@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load shop_extras %}
+
+{% block title %}Envíos y devoluciones — {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
+  <h1 class="font-display text-3xl font-semibold tracking-tight text-ink">Envíos y devoluciones</h1>
+
+  <div class="mt-10 space-y-8 text-ink-muted">
+    <div>
+      <h2 class="font-display text-lg font-semibold text-ink">Envíos</h2>
+      <p class="mt-3">
+        Actualmente enviamos únicamente a direcciones dentro de España. Aplicamos un gasto de
+        envío fijo de <span class="price text-ink">{{ shipping.flat_fee|eur }}</span> por
+        pedido.
+        {% if shipping.free_shipping_threshold %}
+          Los pedidos superiores a <span class="price text-ink">{{ shipping.free_shipping_threshold|eur }}</span>
+          tienen el envío gratuito.
+        {% endif %}
+      </p>
+      <p class="mt-3">
+        Los plazos de entrega habituales son de 2 a 5 días laborables desde la confirmación
+        del pago. Recibirás un correo de confirmación en cuanto tu pedido sea procesado.
+      </p>
+    </div>
+
+    <div>
+      <h2 class="font-display text-lg font-semibold text-ink">Devoluciones</h2>
+      <p class="mt-3">
+        Dispones de 14 días naturales desde la recepción del pedido para solicitar su
+        devolución, conforme a nuestros
+        <a href="{% url 'pages:terms_of_sale' %}" class="text-accent hover:underline">términos y condiciones de venta</a>.
+        Los productos deben devolverse en su envase original, sin abrir, salvo que presenten
+        un defecto de fabricación.
+      </p>
+      <p class="mt-3">
+        Para iniciar una devolución, escríbenos a {{ SITE_EMAIL }} indicando el número de
+        pedido. Una vez recibido y comprobado el producto, procesaremos el reembolso por el
+        mismo método de pago utilizado en la compra en un plazo máximo de 14 días.
+      </p>
+    </div>
+
+    <div>
+      <h2 class="font-display text-lg font-semibold text-ink">Productos dañados o incorrectos</h2>
+      <p class="mt-3">
+        Si tu pedido llega dañado o no corresponde con lo solicitado, contacta con nosotros
+        en {{ SITE_EMAIL }} en un plazo de 48 horas y te ofreceremos una sustitución o el
+        reembolso completo, incluidos los gastos de envío.
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}

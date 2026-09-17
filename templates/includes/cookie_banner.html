@@ -1,0 +1,28 @@
+<div
+  x-data="{
+    visible: false,
+    init() {
+      try { this.visible = !localStorage.getItem('cookie_consent'); }
+      catch (e) { this.visible = true; }
+    },
+    choose(value) {
+      this.visible = false;
+      try { localStorage.setItem('cookie_consent', value); } catch (e) {}
+    },
+  }"
+  x-show="visible" x-cloak
+  class="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-surface"
+  role="dialog" aria-live="polite" aria-label="Aviso de cookies"
+>
+  <div class="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+    <p class="text-sm text-ink-muted">
+      Usamos cookies propias necesarias para el funcionamiento de la tienda y, con tu
+      consentimiento, cookies de análisis. Puedes obtener más información en nuestra
+      <a href="{% url 'pages:cookie_policy' %}" class="text-ink underline underline-offset-2 hover:text-accent">política de cookies</a>.
+    </p>
+    <div class="flex shrink-0 gap-2">
+      <button type="button" @click="choose('rejected')" class="btn-secondary">Rechazar</button>
+      <button type="button" @click="choose('accepted')" class="btn-primary">Aceptar</button>
+    </div>
+  </div>
+</div>

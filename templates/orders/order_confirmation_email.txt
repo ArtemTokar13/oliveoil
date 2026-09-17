@@ -1,0 +1,24 @@
+{% load shop_extras %}{% autoescape off %}Hola{% if order.shipping_full_name %}, {{ order.shipping_full_name }}{% endif %},
+
+Hemos confirmado el pago de tu pedido #{{ order.pk }} en {{ SITE_NAME }}.
+
+Puedes ver el estado y los detalles de tu pedido en cualquier momento en este enlace:
+{{ status_url }}
+
+Resumen del pedido:
+{% for item in order.items.all %}
+- {{ item.quantity }} x {{ item.product_name }} ({{ item.product_volume }}) — {{ item.line_total|eur }}
+{% endfor %}
+Subtotal: {{ order.subtotal|eur }}
+Envío: {{ order.shipping_cost|eur }}
+Total: {{ order.total|eur }}
+
+Enviamos a:
+{{ order.shipping_full_name }}
+{{ order.shipping_street_address }}{% if order.shipping_apartment %}, {{ order.shipping_apartment }}{% endif %}
+{{ order.shipping_postal_code }} {{ order.shipping_city }}, {{ order.shipping_province }}
+{{ order.shipping_country }}
+
+Gracias por tu compra.
+— {{ SITE_NAME }}
+{% endautoescape %}

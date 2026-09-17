@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ SITE_NAME }} — Aceite de oliva español{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}Aceite de oliva cuidadosamente seleccionado de productores españoles.{% endblock %}">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,400;0,500;0,600;0,700;1,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{% static 'css/output.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="flex min-h-full flex-col bg-bg font-sans text-ink antialiased" x-data="{ mobileNavOpen: false, miniCartOpen: false }">
+
+  <a href="#contenido" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-accent focus:px-4 focus:py-2 focus:text-bg">
+    Saltar al contenido
+  </a>
+
+  {% include "includes/messages.html" %}
+
+  {% include "includes/header.html" %}
+
+  <main id="contenido" class="flex-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% include "includes/footer.html" %}
+  {% include "includes/cookie_banner.html" %}
+
+  <script>
+    document.addEventListener('alpine:init', () => {
+      Alpine.store('cart', { count: {{ cart_items_count }} });
+    });
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.9/dist/cdn.min.js"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load shop_extras %}
+
+{% block title %}Checkout — {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+  <h1 class="font-display text-2xl font-semibold tracking-tight text-ink sm:text-3xl">Finalizar compra</h1>
+
+  <div class="mt-8 grid gap-10 lg:grid-cols-3">
+    <form method="post" class="lg:col-span-2"
+          x-data="{ mode: '{% if new_address_errors or not addresses %}new{% else %}existing{% endif %}' }">
+      {% csrf_token %}
+
+      <h2 class="font-display text-lg font-semibold text-ink">Dirección de envío</h2>
+
+      {% if is_guest %}
+        <p class="mt-2 text-sm text-ink-muted">
+          Puedes comprar sin crear una cuenta — solo necesitamos tu correo para enviarte la
+          confirmación y el enlace de seguimiento de tu pedido.
+          ¿Ya tienes cuenta? <a href="{% url 'accounts:login' %}?next={{ request.path|urlencode }}" class="text-accent hover:underline">Inicia sesión</a>
+          para usar una dirección guardada.
+        </p>
+
+        <div class="mt-4">
+          <label for="email" class="field-label">Correo electrónico</label>
+          <input type="email" name="email" id="email" value="{{ guest_email }}" class="field-input" required>
+          {% if guest_email_error %}<p class="field-error">{{ guest_email_error }}</p>{% endif %}
+        </div>
+
+        <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {% include "accounts/_address_fields.html" with errors=new_address_errors values=new_address_values show_default_checkbox=False %}
+        </div>
+      {% else %}
+        <div class="mt-4 space-y-3">
+          {% for address in addresses %}
+            <label class="flex cursor-pointer items-start gap-3 border border-border p-4 has-[:checked]:border-accent">
+              <input type="radio" name="address_id" value="{{ address.id }}" x-model="mode"
+                     {% if address.is_default %}checked{% endif %} class="mt-1 accent-accent">
+              <span class="text-sm">
+                <span class="block font-medium text-ink">{{ address.full_name }}
+                  {% if address.is_default %}<span class="badge ml-2 border-accent-2 text-accent-2">Predeterminada</span>{% endif %}
+                </span>
+                <span class="block text-ink-muted">
+                  {{ address.street_address }}{% if address.apartment %}, {{ address.apartment }}{% endif %}<br>
+                  {{ address.postal_code }} {{ address.city }}, {{ address.province }}<br>
+                  {{ address.country }} · {{ address.phone }}
+                </span>
+              </span>
+            </label>
+          {% endfor %}
+
+          <label class="flex cursor-pointer items-center gap-3 border border-dashed border-border p-4 has-[:checked]:border-accent">
+            <input type="radio" name="address_id" value="new" x-model="mode"
+                   {% if not addresses %}checked{% endif %} class="accent-accent">
+            <span class="text-sm font-medium text-ink">+ Añadir una nueva dirección</span>
+          </label>
+        </div>
+
+        <div x-show="mode === 'new'" {% if addresses and not new_address_errors %}x-cloak{% endif %} class="mt-4 grid grid-cols-1 gap-4 border border-border p-4 sm:grid-cols-2">
+          {% include "accounts/_address_fields.html" with errors=new_address_errors values=new_address_values %}
+        </div>
+      {% endif %}
+
+      <h2 class="mt-10 font-display text-lg font-semibold text-ink">Resumen del pedido</h2>
+      <div class="mt-4 divide-y divide-border border-y border-border">
+        {% for product, quantity in line_items %}
+          <div class="flex items-center justify-between py-3 text-sm">
+            <span class="text-ink">{{ quantity }} × {{ product.name }} <span class="text-ink-muted">({{ product.get_volume_display }})</span></span>
+            <span class="price text-ink">{{ product.price|eur }}</span>
+          </div>
+        {% endfor %}
+      </div>
+
+      <button type="submit" class="btn-primary mt-8 w-full sm:w-auto">
+        Continuar al pago con Stripe
+      </button>
+      <p class="mt-3 text-xs text-ink-muted">Serás redirigido a la pasarela segura de Stripe para completar el pago.</p>
+    </form>
+
+    <aside class="h-fit border border-border bg-surface p-6">
+      <h2 class="font-display text-lg font-semibold text-ink">Total</h2>
+      <dl class="mt-4 space-y-2 text-sm">
+        <div class="flex justify-between">
+          <dt class="text-ink-muted">Subtotal</dt>
+          <dd class="price text-ink">{{ subtotal|eur }}</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-ink-muted">Envío</dt>
+          <dd class="price text-ink">{% if shipping_cost %}{{ shipping_cost|eur }}{% else %}Gratis{% endif %}</dd>
+        </div>
+        <div class="flex justify-between border-t border-border pt-2 text-base font-semibold">
+          <dt>Total</dt>
+          <dd class="price">{{ total|eur }}</dd>
+        </div>
+      </dl>
+    </aside>
+  </div>
+</section>
+{% endblock %}

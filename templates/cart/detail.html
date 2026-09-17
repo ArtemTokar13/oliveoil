@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load shop_extras %}
+
+{% block title %}Carrito — {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+  <h1 class="font-display text-2xl font-semibold tracking-tight text-ink sm:text-3xl">Tu carrito</h1>
+
+  {% if items %}
+    <div class="mt-8 divide-y divide-border border-y border-border">
+      {% for item in items %}
+        <div class="flex flex-col gap-4 py-6 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex items-center gap-4">
+            <div class="h-20 w-20 shrink-0 border border-border bg-surface-2">
+              {% with image=item.product.main_image %}
+                {% if image %}
+                  <img src="{{ image.image.url }}" alt="" class="h-full w-full object-cover">
+                {% endif %}
+              {% endwith %}
+            </div>
+            <div>
+              <a href="{{ item.product.get_absolute_url }}" class="font-display font-medium text-ink hover:text-accent">
+                {{ item.product.name }}
+              </a>
+              <p class="text-sm text-ink-muted">{{ item.product.get_volume_display }}</p>
+              <p class="price mt-1 text-sm text-ink-muted">{{ item.product.price|eur }} / ud.</p>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between gap-6 sm:justify-end">
+            <form method="post" action="{% url 'cart:update' item.id %}" class="flex items-center gap-2">
+              {% csrf_token %}
+              <label for="qty-{{ item.id }}" class="sr-only">Cantidad de {{ item.product.name }}</label>
+              <select id="qty-{{ item.id }}" name="quantity" onchange="this.form.submit()" class="field-input w-20 py-1.5">
+                {% for n in item.product.stock|default:1|get_range %}
+                  <option value="{{ n }}" {% if n == item.quantity %}selected{% endif %}>{{ n }}</option>
+                {% endfor %}
+              </select>
+              <noscript><button type="submit" class="btn-ghost">Actualizar</button></noscript>
+            </form>
+
+            <p class="price w-20 text-right font-medium text-ink">{{ item.line_total|eur }}</p>
+
+            <form method="post" action="{% url 'cart:remove' item.id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn-ghost" aria-label="Eliminar {{ item.product.name }}">Eliminar</button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="mt-8 flex flex-col items-end gap-3">
+      <div class="flex w-full max-w-xs items-center justify-between text-lg">
+        <span class="font-medium text-ink">Subtotal</span>
+        <span class="price font-semibold text-ink">{{ cart.subtotal|eur }}</span>
+      </div>
+      <p class="text-sm text-ink-muted">Los gastos de envío se calculan en el checkout.</p>
+      <a href="{% url 'orders:checkout' %}" class="btn-primary">Finalizar compra</a>
+    </div>
+  {% else %}
+    <div class="mt-10 border border-dashed border-border px-6 py-16 text-center">
+      <p class="text-ink-muted">Tu carrito está vacío.</p>
+      <a href="{% url 'catalog:home' %}" class="btn-primary mt-4 inline-flex">Ver productos</a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

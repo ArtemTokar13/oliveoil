@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Iniciar sesión — {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-md px-4 py-16 sm:px-6 lg:px-8">
+  <h1 class="font-display text-2xl font-semibold tracking-tight text-ink">Iniciar sesión</h1>
+  <p class="mt-2 text-sm text-ink-muted">
+    Sin contraseñas: te enviamos un código de un solo uso a tu correo. Si es la primera
+    vez, esto también crea tu cuenta.
+  </p>
+
+  <form method="post" class="mt-8 space-y-4">
+    {% csrf_token %}
+    {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+
+    <div>
+      <label for="email" class="field-label">Correo electrónico</label>
+      <input type="email" name="email" id="email" value="{{ email }}" class="field-input" autofocus required>
+      {% if error %}<p class="field-error">{{ error }}</p>{% endif %}
+    </div>
+
+    <button type="submit" class="btn-primary w-full">Enviar código</button>
+  </form>
+
+  {% include "accounts/_google_button.html" %}
+</section>
+{% endblock %}
