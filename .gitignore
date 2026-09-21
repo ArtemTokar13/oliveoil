@@ -2,6 +2,7 @@ __pycache__/
 *.pyc
 venv/
 .env
+app/local_settings.py
 db.sqlite3
 staticfiles/
 media/

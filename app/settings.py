@@ -101,6 +101,11 @@ LOGOUT_REDIRECT_URL = "catalog:home"
 
 # --- Email -------------------------------------------------------------
 EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
+EMAIL_HOST = env("EMAIL_HOST", default="")
+EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="Aceite de Oliva <no-reply@example.com>")
 CONTACT_EMAIL = env("CONTACT_EMAIL", default="hola@example.com")
 
@@ -135,3 +140,9 @@ SITE_IAE = "Epígrafe 845 — Explotación electrónica por terceros (alta: 02/0
 
 # --- Shipping --------------------------------------------------------------
 DEFAULT_SHIPPING_FEE = env.str("DEFAULT_SHIPPING_FEE", default="4.95")
+
+# Import local settings
+try:
+    from .local_settings import *
+except ImportError:
+    pass
