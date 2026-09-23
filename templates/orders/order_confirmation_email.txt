@@ -1,6 +1,6 @@
 {% load shop_extras %}{% autoescape off %}Hola{% if order.shipping_full_name %}, {{ order.shipping_full_name }}{% endif %},
 
-Hemos confirmado el pago de tu pedido #{{ order.pk }} en {{ SITE_NAME }}.
+Hemos confirmado el pago de tu pedido #{{ order.order_number }} en {{ SITE_NAME }}.
 
 Puedes ver el estado y los detalles de tu pedido en cualquier momento en este enlace:
 {{ status_url }}

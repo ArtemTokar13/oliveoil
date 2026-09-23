@@ -1,19 +1,16 @@
 {% extends "base.html" %}
 {% load shop_extras %}
 
-{% block title %}Pedido #{{ order.id }} — {{ SITE_NAME }}{% endblock %}
+{% block title %}Pedido #{{ order.order_number }} — {{ SITE_NAME }}{% endblock %}
 
 {% block content %}
 <section class="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
   <a href="{% url 'orders:list' %}" class="text-sm text-ink-muted hover:text-accent">&larr; Mis pedidos</a>
 
   <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
-    <h1 class="font-display text-2xl font-semibold tracking-tight text-ink sm:text-3xl">Pedido #{{ order.id }}</h1>
-    <span class="badge
-      {% if order.status == 'PAID' %}border-accent-2 text-accent-2
-      {% elif order.status == 'CANCELLED' %}border-ink-muted text-ink-muted
-      {% else %}border-accent text-accent{% endif %}">
-      {{ order.get_status_display }}
+    <h1 class="font-display text-2xl font-semibold tracking-tight text-ink sm:text-3xl">Pedido #{{ order.order_number }}</h1>
+    <span class="badge {{ order.display_status_css }}">
+      {{ order.display_status }}
     </span>
   </div>
   <p class="mt-1 text-sm text-ink-muted">Realizado el {{ order.created_at|date:"d \d\e F \d\e Y, H:i" }}</p>

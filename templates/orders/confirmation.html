@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load shop_extras %}
 
-{% block title %}Pedido #{{ order.id }} — {{ SITE_NAME }}{% endblock %}
+{% block title %}Pedido #{{ order.order_number }} — {{ SITE_NAME }}{% endblock %}
 
 {% block extra_head %}
   {% if order.status == "PENDING" %}
@@ -32,8 +32,14 @@
   <div class="mt-10 border border-border">
     <div class="flex items-center justify-between border-b border-border px-6 py-4">
       <span class="text-sm text-ink-muted">Pedido</span>
-      <span class="font-mono text-sm text-ink">#{{ order.id }}</span>
+      <span class="font-mono text-sm text-ink">#{{ order.order_number }}</span>
     </div>
+    {% if order.status == "PAID" %}
+      <div class="flex items-center justify-between border-b border-border px-6 py-4">
+        <span class="text-sm text-ink-muted">Estado del envío</span>
+        <span class="badge {{ order.display_status_css }}">{{ order.display_status }}</span>
+      </div>
+    {% endif %}
     <div class="divide-y divide-border">
       {% for item in order.items.all %}
         <div class="flex items-center justify-between px-6 py-3 text-sm">

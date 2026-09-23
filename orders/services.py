@@ -128,7 +128,7 @@ def send_order_confirmation_email(request, order):
     })
     try:
         send_mail(
-            subject=f"Confirmación de tu pedido #{order.pk} — {settings.SITE_NAME}",
+            subject=f"Confirmación de tu pedido #{order.order_number} — {settings.SITE_NAME}",
             message=body,
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[order.email],

@@ -47,6 +47,12 @@ class Order(models.Model):
         PAID = "PAID", "Pagado"
         CANCELLED = "CANCELLED", "Cancelado"
 
+    class FulfillmentStatus(models.TextChoices):
+        RECEIVED = "RECEIVED", "Recibido"
+        PROCESSING = "PROCESSING", "En preparación"
+        SHIPPED = "SHIPPED", "Enviado"
+        DELIVERED = "DELIVERED", "Entregado"
+
     # Null for guest checkouts — purchasing never requires an account.
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name="usuario",
@@ -64,6 +70,12 @@ class Order(models.Model):
     # works without login, so it has to not be a sequential pk.
     access_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False, db_index=True)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
+    # Only meaningful once status == PAID — tracked separately from payment
+    # status because a paid order still moves through its own shipping states.
+    fulfillment_status = models.CharField(
+        "estado de envío", max_length=20,
+        choices=FulfillmentStatus.choices, default=FulfillmentStatus.RECEIVED,
+    )
 
     shipping_full_name = models.CharField("nombre completo", max_length=150)
     shipping_phone = models.CharField("teléfono", max_length=30)
@@ -91,7 +103,29 @@ class Order(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"Pedido #{self.pk} — {self.user or self.email}"
+        return f"Pedido #{self.order_number} — {self.user or self.email}"
+
+    @property
+    def order_number(self):
+        """Human-facing order number — derived from access_token (random per
+        order), not pk, so customers can't infer how many orders exist."""
+        return f"{self.access_token.hex[:5].upper()}"
+
+    @property
+    def display_status(self):
+        """What the customer sees as 'the' status — payment status while
+        unpaid/cancelled, fulfillment progress once it's actually paid."""
+        if self.status == self.Status.PAID:
+            return self.get_fulfillment_status_display()
+        return self.get_status_display()
+
+    @property
+    def display_status_css(self):
+        if self.status == self.Status.CANCELLED:
+            return "border-ink-muted text-ink-muted"
+        if self.status == self.Status.PAID and self.fulfillment_status == self.FulfillmentStatus.DELIVERED:
+            return "border-accent-2 text-accent-2"
+        return "border-accent text-accent"
 
     def get_absolute_url(self):
         """Owner-only view, for the authenticated 'Mis pedidos' list."""

@@ -9,6 +9,9 @@ class OrderItemInline(admin.TabularInline):
     readonly_fields = ("product", "product_name", "product_volume", "unit_price", "quantity", "line_total")
     can_delete = False
 
+    def has_add_permission(self, request, obj=None):
+        return False
+
     @admin.display(description="Total línea")
     def line_total(self, obj):
         return obj.line_total
@@ -16,8 +19,8 @@ class OrderItemInline(admin.TabularInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ("id", "customer", "status", "total", "created_at", "paid_at")
-    list_filter = ("status", "created_at")
+    list_display = ("id", "customer", "status", "fulfillment_status", "total", "created_at", "paid_at")
+    list_filter = ("status", "fulfillment_status", "created_at")
     search_fields = ("id", "email", "user__email", "shipping_full_name", "stripe_checkout_session_id")
     readonly_fields = (
         "user", "email", "session_key", "access_token", "subtotal", "shipping_cost", "total",
