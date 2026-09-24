@@ -33,6 +33,16 @@
         <textarea name="message" id="message" rows="5" class="field-input">{{ values.message }}</textarea>
         {% if errors.message %}<p class="field-error">{{ errors.message }}</p>{% endif %}
       </div>
+      <div>
+        <label class="flex items-start gap-2 text-sm text-ink">
+          <input type="checkbox" name="privacy_consent" class="mt-1 accent-accent" required>
+          <span>
+            He leído y acepto la
+            <a href="{% url 'pages:privacy_policy' %}" target="_blank" class="text-accent hover:underline">política de privacidad</a>.
+          </span>
+        </label>
+        {% if errors.privacy_consent %}<p class="field-error">{{ errors.privacy_consent }}</p>{% endif %}
+      </div>
       <button type="submit" class="btn-primary">Enviar mensaje</button>
     </form>
 

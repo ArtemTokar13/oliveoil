@@ -54,6 +54,8 @@ def contact(request):
             errors["subject"] = "Introduce un asunto."
         if not values["message"]:
             errors["message"] = "Escribe tu mensaje."
+        if not request.POST.get("privacy_consent"):
+            errors["privacy_consent"] = "Debes aceptar la política de privacidad para enviar el mensaje."
 
         if not errors:
             ContactMessage.objects.create(**values)
