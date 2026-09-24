@@ -18,7 +18,10 @@ Enviamos a:
 {{ order.shipping_street_address }}{% if order.shipping_apartment %}, {{ order.shipping_apartment }}{% endif %}
 {{ order.shipping_postal_code }} {{ order.shipping_city }}, {{ order.shipping_province }}
 {{ order.shipping_country }}
-
+{% if order.is_local_delivery %}
+Tu pedido entra en nuestra zona de reparto local gratuito y se entrega en mano
+{% if order.local_delivery_date %}el {{ order.local_delivery_date|date:"d \d\e F" }}{% else %}en la próxima ronda semanal{% endif %}.
+{% endif %}
 Gracias por tu compra.
 — {{ SITE_NAME }}
 {% endautoescape %}

@@ -59,6 +59,12 @@
       <p>{{ order.shipping_street_address }}{% if order.shipping_apartment %}, {{ order.shipping_apartment }}{% endif %}</p>
       <p>{{ order.shipping_postal_code }} {{ order.shipping_city }}, {{ order.shipping_province }}</p>
     </div>
+    {% if order.is_local_delivery %}
+      <div class="border-t border-border bg-accent-2/10 px-6 py-4 text-sm text-accent-2">
+        Reparto local gratuito — entrega en mano
+        {% if order.local_delivery_date %}el <strong>{{ order.local_delivery_date|date:"d \d\e F" }}</strong>{% else %}en la próxima ronda semanal{% endif %}.
+      </div>
+    {% endif %}
   </div>
 
   {% if order.status == "PAID" and not order.user_id and not request.user.is_authenticated %}

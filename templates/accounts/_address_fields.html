@@ -20,7 +20,7 @@
 </div>
 <div>
   <label for="postal_code" class="field-label">Código postal</label>
-  <input type="text" inputmode="numeric" name="postal_code" id="postal_code" value="{{ values.postal_code|default:'' }}" class="field-input">
+  <input type="text" inputmode="numeric" name="postal_code" id="postal_code" value="{{ values.postal_code|default:'' }}" class="field-input"{% if bind_postal_model %} x-model="newPostal"{% endif %}>
   {% if errors.postal_code %}<p class="field-error">{{ errors.postal_code }}</p>{% endif %}
 </div>
 <div>

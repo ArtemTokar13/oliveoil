@@ -20,35 +20,18 @@
 </section>
 
 <section class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-  <form method="get" class="mb-8 flex flex-wrap items-end gap-4 border-b border-border pb-6">
-    <div>
-      <label for="categoria" class="field-label">Categoría</label>
-      <select id="categoria" name="categoria" onchange="this.form.submit()"
-              class="field-input min-w-[10rem]">
-        <option value="">Todas</option>
-        {% for category in categories %}
-          <option value="{{ category.slug }}" {% if category.slug == selected_category %}selected{% endif %}>
-            {{ category.name }}
-          </option>
-        {% endfor %}
-      </select>
-    </div>
-    <div>
-      <label for="marca" class="field-label">Marca</label>
-      <select id="marca" name="marca" onchange="this.form.submit()"
-              class="field-input min-w-[10rem]">
-        <option value="">Todas</option>
-        {% for brand in brands %}
-          <option value="{{ brand.slug }}" {% if brand.slug == selected_brand %}selected{% endif %}>
-            {{ brand.name }}
-          </option>
-        {% endfor %}
-      </select>
-    </div>
-    {% if selected_category or selected_brand %}
-      <a href="{% url 'catalog:home' %}" class="btn-ghost">Quitar filtros</a>
-    {% endif %}
-    <noscript><button type="submit" class="btn-secondary">Filtrar</button></noscript>
+  <div class="mb-8 border-b border-border pb-6 sm:hidden" x-data="{ open: false }">
+    <button type="button" class="btn-secondary w-full justify-center" @click="open = !open" :aria-expanded="open">
+      <span x-text="open ? 'Ocultar filtros' : 'Filtros'"></span>
+      {% if selected_category or selected_brand %}<span class="badge ml-2 border-accent-2 text-accent-2">Activos</span>{% endif %}
+    </button>
+    <form method="get" x-show="open" x-cloak class="mt-4 flex flex-wrap items-end gap-4">
+      {% include "catalog/_filter_fields.html" with id_suffix="-m" %}
+    </form>
+  </div>
+
+  <form method="get" class="mb-8 hidden flex-wrap items-end gap-4 border-b border-border pb-6 sm:flex">
+    {% include "catalog/_filter_fields.html" %}
   </form>
 
   {% if products %}

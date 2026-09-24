@@ -1,0 +1,29 @@
+{# id_suffix keeps ids/for-attributes unique when this is included twice (mobile + desktop). #}
+<div>
+  <label for="categoria{{ id_suffix }}" class="field-label">Categoría</label>
+  <select id="categoria{{ id_suffix }}" name="categoria" onchange="this.form.submit()"
+          class="field-input min-w-[10rem]">
+    <option value="">Todas</option>
+    {% for category in categories %}
+      <option value="{{ category.slug }}" {% if category.slug == selected_category %}selected{% endif %}>
+        {{ category.name }}
+      </option>
+    {% endfor %}
+  </select>
+</div>
+<div>
+  <label for="marca{{ id_suffix }}" class="field-label">Marca</label>
+  <select id="marca{{ id_suffix }}" name="marca" onchange="this.form.submit()"
+          class="field-input min-w-[10rem]">
+    <option value="">Todas</option>
+    {% for brand in brands %}
+      <option value="{{ brand.slug }}" {% if brand.slug == selected_brand %}selected{% endif %}>
+        {{ brand.name }}
+      </option>
+    {% endfor %}
+  </select>
+</div>
+{% if selected_category or selected_brand %}
+  <a href="{% url 'catalog:home' %}" class="btn-ghost">Quitar filtros</a>
+{% endif %}
+<noscript><button type="submit" class="btn-secondary">Filtrar</button></noscript>

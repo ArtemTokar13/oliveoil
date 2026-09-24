@@ -51,7 +51,10 @@ def create_order(request, shipping_fields, email):
 
     subtotal = sum((product.price * quantity for product, quantity in line_items), start=Decimal("0"))
     shipping_settings = ShippingSettings.get_solo()
-    shipping_cost = shipping_settings.shipping_cost_for(subtotal)
+    postal_code = shipping_fields["postal_code"]
+    shipping_cost = shipping_settings.shipping_cost_for(subtotal, postal_code=postal_code)
+    is_local_delivery = shipping_settings.is_local_delivery_postal_code(postal_code)
+    local_delivery_date = shipping_settings.next_local_delivery_date() if is_local_delivery else None
     total = subtotal + shipping_cost
 
     order = Order.objects.create(
@@ -62,12 +65,14 @@ def create_order(request, shipping_fields, email):
         shipping_phone=shipping_fields["phone"],
         shipping_street_address=shipping_fields["street_address"],
         shipping_apartment=shipping_fields.get("apartment", ""),
-        shipping_postal_code=shipping_fields["postal_code"],
+        shipping_postal_code=postal_code,
         shipping_city=shipping_fields["city"],
         shipping_province=shipping_fields["province"],
         subtotal=subtotal,
         shipping_cost=shipping_cost,
         total=total,
+        is_local_delivery=is_local_delivery,
+        local_delivery_date=local_delivery_date,
     )
     for product, quantity in line_items:
         OrderItem.objects.create(

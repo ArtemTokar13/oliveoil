@@ -19,11 +19,15 @@ class OrderItemInline(admin.TabularInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ("id", "customer", "status", "fulfillment_status", "total", "created_at", "paid_at")
-    list_filter = ("status", "fulfillment_status", "created_at")
+    list_display = (
+        "id", "customer", "status", "fulfillment_status", "total",
+        "is_local_delivery", "local_delivery_date", "created_at", "paid_at",
+    )
+    list_filter = ("status", "fulfillment_status", "is_local_delivery", "created_at")
     search_fields = ("id", "email", "user__email", "shipping_full_name", "stripe_checkout_session_id")
     readonly_fields = (
         "user", "email", "session_key", "access_token", "subtotal", "shipping_cost", "total",
+        "is_local_delivery", "local_delivery_date",
         "stripe_checkout_session_id", "stripe_payment_intent_id", "created_at", "updated_at", "paid_at",
     )
     inlines = [OrderItemInline]
@@ -38,7 +42,7 @@ class OrderAdmin(admin.ModelAdmin):
 
 @admin.register(ShippingSettings)
 class ShippingSettingsAdmin(admin.ModelAdmin):
-    list_display = ("flat_fee", "free_shipping_threshold")
+    list_display = ("flat_fee", "free_shipping_threshold", "local_delivery_weekday")
 
     def has_add_permission(self, request):
         return not ShippingSettings.objects.exists()

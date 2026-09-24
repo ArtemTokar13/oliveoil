@@ -7,9 +7,11 @@
 <section class="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
   <h1 class="font-display text-2xl font-semibold tracking-tight text-ink sm:text-3xl">Finalizar compra</h1>
 
-  <div class="mt-8 grid gap-10 lg:grid-cols-3">
-    <form method="post" class="lg:col-span-2"
-          x-data="{ mode: '{% if new_address_errors or not addresses %}new{% else %}existing{% endif %}' }">
+  {{ checkout_init|json_script:"checkout-init-data" }}
+
+  <div class="mt-8 grid gap-10 lg:grid-cols-3"
+       x-data="checkoutAddress(JSON.parse(document.getElementById('checkout-init-data').textContent))">
+    <form method="post" class="lg:col-span-2">
       {% csrf_token %}
 
       <h2 class="font-display text-lg font-semibold text-ink">Dirección de envío</h2>
@@ -29,8 +31,14 @@
         </div>
 
         <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {% include "accounts/_address_fields.html" with errors=new_address_errors values=new_address_values show_default_checkbox=False %}
+          {% include "accounts/_address_fields.html" with errors=new_address_errors values=new_address_values show_default_checkbox=False bind_postal_model=True %}
         </div>
+        <p x-show="isLocalZone" x-cloak class="mt-3 border border-accent-2 bg-accent-2/10 px-4 py-3 text-sm text-accent-2">
+          Tu código postal está dentro de nuestra zona de reparto local gratuito
+          (Castellón de la Plana y alrededores). Estos pedidos se entregan en mano una vez
+          por semana{% if next_local_delivery_date %}; la próxima ronda de reparto es el
+          <strong>{{ next_local_delivery_date|date:"d \d\e F" }}</strong>{% endif %}.
+        </p>
       {% else %}
         <div class="mt-4 space-y-3">
           {% for address in addresses %}
@@ -40,6 +48,7 @@
               <span class="text-sm">
                 <span class="block font-medium text-ink">{{ address.full_name }}
                   {% if address.is_default %}<span class="badge ml-2 border-accent-2 text-accent-2">Predeterminada</span>{% endif %}
+                  {% if address.postal_code in local_delivery_postal_codes %}<span class="badge ml-2 border-accent-2 text-accent-2">Reparto local gratuito</span>{% endif %}
                 </span>
                 <span class="block text-ink-muted">
                   {{ address.street_address }}{% if address.apartment %}, {{ address.apartment }}{% endif %}<br>
@@ -58,8 +67,15 @@
         </div>
 
         <div x-show="mode === 'new'" {% if addresses and not new_address_errors %}x-cloak{% endif %} class="mt-4 grid grid-cols-1 gap-4 border border-border p-4 sm:grid-cols-2">
-          {% include "accounts/_address_fields.html" with errors=new_address_errors values=new_address_values %}
+          {% include "accounts/_address_fields.html" with errors=new_address_errors values=new_address_values bind_postal_model=True %}
         </div>
+
+        <p x-show="isLocalZone" x-cloak class="mt-3 border border-accent-2 bg-accent-2/10 px-4 py-3 text-sm text-accent-2">
+          Esta dirección está dentro de nuestra zona de reparto local gratuito (Castellón de
+          la Plana y alrededores). Estos pedidos se entregan en mano una vez por
+          semana{% if next_local_delivery_date %}; la próxima ronda de reparto es el
+          <strong>{{ next_local_delivery_date|date:"d \d\e F" }}</strong>{% endif %}.
+        </p>
       {% endif %}
 
       <h2 class="mt-10 font-display text-lg font-semibold text-ink">Resumen del pedido</h2>
@@ -73,7 +89,7 @@
       </div>
 
       <button type="submit" class="btn-primary mt-8 w-full sm:w-auto">
-        Continuar al pago con Stripe
+        Continuar al pago
       </button>
       <p class="mt-3 text-xs text-ink-muted">Serás redirigido a la pasarela segura de Stripe para completar el pago.</p>
     </form>
@@ -87,14 +103,50 @@
         </div>
         <div class="flex justify-between">
           <dt class="text-ink-muted">Envío</dt>
-          <dd class="price text-ink">{% if shipping_cost %}{{ shipping_cost|eur }}{% else %}Gratis{% endif %}</dd>
+          <dd class="price text-ink" x-text="shippingCost ? formatEur(shippingCost) : 'Gratis'">{% if shipping_cost %}{{ shipping_cost|eur }}{% else %}Gratis{% endif %}</dd>
         </div>
         <div class="flex justify-between border-t border-border pt-2 text-base font-semibold">
           <dt>Total</dt>
-          <dd class="price">{{ total|eur }}</dd>
+          <dd class="price" x-text="formatEur(subtotal + shippingCost)">{{ total|eur }}</dd>
         </div>
       </dl>
+      <p x-show="isLocalZone" x-cloak class="mt-4 text-xs text-accent-2">
+        Envío gratuito · reparto local semanal{% if next_local_delivery_date %} · próxima entrega
+        el {{ next_local_delivery_date|date:"d \d\e F" }}{% endif %}
+      </p>
     </aside>
   </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('alpine:init', () => {
+    Alpine.data('checkoutAddress', (init) => ({
+      mode: init.mode,
+      newPostal: init.newPostal,
+      addressPostals: init.addressPostals,
+      zoneCodes: init.zoneCodes,
+      subtotal: init.subtotal,
+      flatFee: init.flatFee,
+      freeThreshold: init.freeThreshold,
+      get selectedPostal() {
+        return (this.mode === 'new' ? this.newPostal : (this.addressPostals[this.mode] || '')).trim();
+      },
+      get isLocalZone() {
+        return this.zoneCodes.includes(this.selectedPostal);
+      },
+      get shippingCost() {
+        if (this.isLocalZone) return 0;
+        if (this.freeThreshold !== null && this.subtotal >= this.freeThreshold) return 0;
+        return this.flatFee;
+      },
+      formatEur(value) {
+        const sign = value < 0 ? '-' : '';
+        const [whole, cents] = Math.abs(value).toFixed(2).split('.');
+        return `${sign}${whole.replace(/\B(?=(\d{3})+(?!\d))/g, '.')},${cents} €`;
+      },
+    }));
+  });
+</script>
 {% endblock %}

@@ -53,7 +53,7 @@ def checkout(request):
         return redirect("cart:detail")
 
     is_guest = not request.user.is_authenticated
-    addresses = request.user.addresses.all() if not is_guest else Address.objects.none()
+    addresses = list(request.user.addresses.all()) if not is_guest else []
     new_address_errors = {}
     new_address_values = {}
     guest_email = ""
@@ -105,7 +105,17 @@ def checkout(request):
 
     subtotal = sum((product.price * quantity for product, quantity in line_items), start=0)
     shipping_settings = ShippingSettings.get_solo()
-    shipping_cost = shipping_settings.shipping_cost_for(subtotal)
+    default_address = next((a for a in addresses if a.is_default), None) or (addresses[0] if addresses else None)
+    preview_postal_code = default_address.postal_code if default_address else new_address_values.get("postal_code")
+    shipping_cost = shipping_settings.shipping_cost_for(subtotal, postal_code=preview_postal_code)
+    local_delivery_postal_codes = shipping_settings.local_delivery_postal_code_list()
+
+    # Only truly "existing" when a saved address is preselected without errors —
+    # otherwise the "new address" form is what's shown, so that's the active mode.
+    if is_guest or new_address_errors or not default_address:
+        initial_mode = "new"
+    else:
+        initial_mode = str(default_address.id)
 
     return render(request, "orders/checkout.html", {
         "addresses": addresses,
@@ -118,6 +128,20 @@ def checkout(request):
         "is_guest": is_guest,
         "guest_email": guest_email,
         "guest_email_error": guest_email_error,
+        "local_delivery_postal_codes": local_delivery_postal_codes,
+        "next_local_delivery_date": shipping_settings.next_local_delivery_date(),
+        "checkout_init": {
+            "mode": initial_mode,
+            "newPostal": new_address_values.get("postal_code", ""),
+            "addressPostals": {str(a.id): a.postal_code for a in addresses},
+            "zoneCodes": local_delivery_postal_codes,
+            "subtotal": float(subtotal),
+            "flatFee": float(shipping_settings.flat_fee),
+            "freeThreshold": (
+                float(shipping_settings.free_shipping_threshold)
+                if shipping_settings.free_shipping_threshold is not None else None
+            ),
+        },
     })
 
 

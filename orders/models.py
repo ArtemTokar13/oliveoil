@@ -1,19 +1,44 @@
 import uuid
+from datetime import timedelta
 from decimal import Decimal
 
 from django.conf import settings
 from django.db import models
 from django.urls import reverse
+from django.utils import timezone
 
 from catalog.models import Product
 
 
 class ShippingSettings(models.Model):
+    class Weekday(models.IntegerChoices):
+        MONDAY = 0, "Lunes"
+        TUESDAY = 1, "Martes"
+        WEDNESDAY = 2, "Miércoles"
+        THURSDAY = 3, "Jueves"
+        FRIDAY = 4, "Viernes"
+        SATURDAY = 5, "Sábado"
+        SUNDAY = 6, "Domingo"
+
     flat_fee = models.DecimalField("gastos de envío (€)", max_digits=6, decimal_places=2, default=Decimal("4.95"))
     free_shipping_threshold = models.DecimalField(
         "envío gratis a partir de (€)", max_digits=8, decimal_places=2,
         null=True, blank=True,
         help_text="Deja en blanco para no ofrecer envío gratuito.",
+    )
+    local_delivery_postal_codes = models.CharField(
+        "códigos postales de reparto local gratuito", max_length=500, blank=True,
+        help_text=(
+            "Códigos postales con envío gratuito y reparto semanal propio, separados por "
+            "comas (p. ej. 12001,12002,12003,12004,12005,12006,12100,12530,12540,12550,12560 "
+            "para Castellón de la Plana, el Grao, Burriana, Vila-real, Almassora y Benicàssim). "
+            "Deja en blanco para desactivar el reparto local."
+        ),
+    )
+    local_delivery_weekday = models.PositiveSmallIntegerField(
+        "día de reparto local", choices=Weekday.choices,
+        null=True, blank=True,
+        help_text="Día de la semana en que se realiza el reparto local. Requiere haber indicado códigos postales.",
     )
 
     class Meta:
@@ -35,10 +60,29 @@ class ShippingSettings(models.Model):
         obj, _ = cls.objects.get_or_create(pk=1)
         return obj
 
-    def shipping_cost_for(self, subtotal):
+    def local_delivery_postal_code_list(self):
+        return [code.strip() for code in self.local_delivery_postal_codes.split(",") if code.strip()]
+
+    def is_local_delivery_postal_code(self, postal_code):
+        if not postal_code or self.local_delivery_weekday is None:
+            return False
+        return postal_code.strip() in self.local_delivery_postal_code_list()
+
+    def shipping_cost_for(self, subtotal, postal_code=None):
+        if self.is_local_delivery_postal_code(postal_code):
+            return 0
         if self.free_shipping_threshold is not None and subtotal >= self.free_shipping_threshold:
             return 0
         return self.flat_fee
+
+    def next_local_delivery_date(self, from_date=None):
+        """Next occurrence of the weekly local round, strictly after `from_date`
+        (today by default) so there's always at least a day to prepare the order."""
+        if self.local_delivery_weekday is None:
+            return None
+        from_date = from_date or timezone.localdate()
+        days_ahead = (self.local_delivery_weekday - from_date.weekday()) % 7 or 7
+        return from_date + timedelta(days=days_ahead)
 
 
 class Order(models.Model):
@@ -89,6 +133,11 @@ class Order(models.Model):
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
     shipping_cost = models.DecimalField(max_digits=8, decimal_places=2)
     total = models.DecimalField(max_digits=10, decimal_places=2)
+
+    # Snapshotted at order creation (not recomputed from ShippingSettings on
+    # every view) so the date shown to the customer never drifts as weeks pass.
+    is_local_delivery = models.BooleanField("reparto local", default=False)
+    local_delivery_date = models.DateField("fecha de reparto local", null=True, blank=True)
 
     stripe_checkout_session_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
     stripe_payment_intent_id = models.CharField(max_length=255, blank=True, null=True)
