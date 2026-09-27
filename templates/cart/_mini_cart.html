@@ -1,0 +1,18 @@
+{% load shop_extras %}
+{% if mini_cart and mini_cart.items.all %}
+  <ul class="max-h-64 space-y-3 overflow-auto">
+    {% for item in mini_cart.items.all %}
+      <li class="flex items-center justify-between gap-3 text-sm">
+        <span class="text-ink">{{ item.quantity }} × {{ item.product.name }}</span>
+        <span class="price text-ink-muted">{{ item.line_total|eur }}</span>
+      </li>
+    {% endfor %}
+  </ul>
+  <div class="mt-3 flex items-center justify-between border-t border-border pt-3 text-sm font-medium">
+    <span>Subtotal</span>
+    <span class="price">{{ mini_cart.subtotal|eur }}</span>
+  </div>
+  <a href="{% url 'cart:detail' %}" class="btn-primary mt-3 w-full">Ver carrito</a>
+{% else %}
+  <p class="text-sm text-ink-muted">Tu carrito está vacío.</p>
+{% endif %}

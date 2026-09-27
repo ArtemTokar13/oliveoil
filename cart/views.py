@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 
 from catalog.models import Product
@@ -39,6 +40,9 @@ def add(request):
         return JsonResponse({
             "ok": True,
             "cart_items_count": current_cart.items_count,
+            "mini_cart_html": render_to_string(
+                "cart/_mini_cart.html", {"mini_cart": current_cart}, request=request,
+            ),
             "message": f"{product.name} añadido al carrito.",
         })
 

@@ -1,6 +1,6 @@
 {% load shop_extras %}
 <a href="{{ product.get_absolute_url }}" class="group block">
-  <div class="aspect-[4/5] overflow-hidden border border-border bg-surface-2">
+  <div class="aspect-[3/4] overflow-hidden border border-border bg-surface-2">
     {% with image=product.main_image %}
       {% if image %}
         <img src="{{ image.image.url }}" alt="{{ image.alt_text|default:product.name }}"

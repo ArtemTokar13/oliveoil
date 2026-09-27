@@ -15,7 +15,7 @@
   <div class="grid gap-10 lg:grid-cols-2">
 
     <div x-data="{ active: 0 }">
-      <div class="aspect-square border border-border bg-surface-2">
+      <div class="aspect-[3/4] border border-border bg-surface-2">
         {% with images=product.images.all %}
           {% if images %}
             {% for image in images %}
@@ -109,7 +109,7 @@
                 loading = true;
                 fetch($event.target.action, { method: 'POST', body: new FormData($event.target), headers: { 'X-Requested-With': 'fetch' } })
                   .then(r => r.json())
-                  .then(data => { if (data.ok) { $store.cart.count = data.cart_items_count; toast = true; setTimeout(() => toast = false, 3000); } })
+                  .then(data => { if (data.ok) { $store.cart.count = data.cart_items_count; document.getElementById('mini-cart-body').innerHTML = data.mini_cart_html; toast = true; setTimeout(() => toast = false, 3000); } })
                   .finally(() => { loading = false; });
               ">
           {% csrf_token %}

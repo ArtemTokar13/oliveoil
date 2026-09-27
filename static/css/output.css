@@ -327,11 +327,8 @@
   .inline-flex {
     display: inline-flex;
   }
-  .aspect-\[4\/5\] {
-    aspect-ratio: 4/5;
-  }
-  .aspect-square {
-    aspect-ratio: 1 / 1;
+  .aspect-\[3\/4\] {
+    aspect-ratio: 3/4;
   }
   .h-0\.5 {
     height: calc(var(--spacing) * 0.5);

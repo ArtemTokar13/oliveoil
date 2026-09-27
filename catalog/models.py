@@ -64,7 +64,7 @@ class Product(models.Model):
     )
     volume = models.CharField("volumen", max_length=10, choices=Volume.choices)
     origin_region = models.CharField("origen / región", max_length=120, blank=True)
-    harvest_year = models.PositiveSmallIntegerField("cosecha", blank=True, null=True)
+    harvest_year = models.CharField("cosecha", max_length=9, blank=True, null=True)
     acidity = models.DecimalField(
         "acidez (%)", max_digits=4, decimal_places=2, blank=True, null=True,
     )
