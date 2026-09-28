@@ -108,6 +108,8 @@ EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="Aceite de Oliva <no-reply@example.com>")
 CONTACT_EMAIL = env("CONTACT_EMAIL", default="hola@example.com")
+# Who gets the "new paid order" notification.
+ORDER_NOTIFICATION_EMAILS = env.list("ORDER_NOTIFICATION_EMAILS", default=["artemtokartouch@gmail.com"])
 
 # --- Stripe -------------------------------------------------------------
 STRIPE_PUBLISHABLE_KEY = env("STRIPE_PUBLISHABLE_KEY", default="")
@@ -140,6 +142,41 @@ SITE_IAE = "Epígrafe 845 — Explotación electrónica por terceros (alta: 02/0
 
 # --- Shipping --------------------------------------------------------------
 DEFAULT_SHIPPING_FEE = env.str("DEFAULT_SHIPPING_FEE", default="4.95")
+
+# --- Logging ---------------------------------------------------------------
+# Errors (unhandled 500s and anything logged with logger.exception/error)
+# go to logs/errors.log — on the server /home/ubuntu/oliveoil/logs/errors.log.
+LOG_DIR = BASE_DIR / "logs"
+LOG_DIR.mkdir(exist_ok=True)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{asctime} {levelname} {name} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+        "errors_file": {
+            "level": "ERROR",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": LOG_DIR / "errors.log",
+            "maxBytes": 5 * 1024 * 1024,
+            "backupCount": 5,
+            "encoding": "utf-8",
+            "formatter": "verbose",
+        },
+    },
+    "root": {
+        "handlers": ["console", "errors_file"],
+        "level": "INFO",
+    },
+}
 
 # Import local settings
 try:

@@ -141,3 +141,25 @@ def send_order_confirmation_email(request, order):
         )
     except Exception:
         logger.exception("No se ha podido enviar el correo de confirmación del pedido #%s", order.pk)
+
+
+def send_new_order_notification(request, order):
+    """Tell the shop owner a paid order came in. Best-effort, same as the
+    customer confirmation — never fail the Stripe webhook over it."""
+    recipients = settings.ORDER_NOTIFICATION_EMAILS
+    if not recipients:
+        return
+    admin_url = request.build_absolute_uri(reverse("admin:orders_order_change", args=[order.pk]))
+    body = render_to_string("orders/order_notification_email.txt", {
+        "order": order, "admin_url": admin_url,
+    })
+    try:
+        send_mail(
+            subject=f"Nuevo pedido #{order.order_number} — {order.total} € — {order.shipping_full_name}",
+            message=body,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=recipients,
+            fail_silently=False,
+        )
+    except Exception:
+        logger.exception("No se ha podido enviar el aviso de nuevo pedido #%s", order.pk)

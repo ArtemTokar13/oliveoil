@@ -1,0 +1,25 @@
+{% load shop_extras %}{% autoescape off %}Nuevo pedido pagado: #{{ order.order_number }}
+
+Cliente: {{ order.shipping_full_name }}
+Correo: {{ order.email|default:"—" }}{% if not order.user_id %} (compra como invitado){% endif %}
+Teléfono: {{ order.shipping_phone }}
+
+Artículos:
+{% for item in order.items.all %}
+- {{ item.quantity }} x {{ item.product_name }} ({{ item.product_volume }}) — {{ item.line_total|eur }}
+{% endfor %}
+Subtotal: {{ order.subtotal|eur }}
+Envío: {{ order.shipping_cost|eur }}
+Total: {{ order.total|eur }}
+
+Dirección de envío:
+{{ order.shipping_full_name }}
+{{ order.shipping_street_address }}{% if order.shipping_apartment %}, {{ order.shipping_apartment }}{% endif %}
+{{ order.shipping_postal_code }} {{ order.shipping_city }}, {{ order.shipping_province }}
+{{ order.shipping_country }}
+{% if order.is_local_delivery %}
+REPARTO LOCAL{% if order.local_delivery_date %} — {{ order.local_delivery_date|date:"l d \d\e F" }}{% endif %}
+{% endif %}
+Ver en el panel de administración:
+{{ admin_url }}
+{% endautoescape %}

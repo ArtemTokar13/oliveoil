@@ -23,6 +23,7 @@ from .services import (
     build_line_items,
     create_order,
     create_stripe_checkout_session,
+    send_new_order_notification,
     send_order_confirmation_email,
 )
 
@@ -225,5 +226,6 @@ def stripe_webhook(request):
                         cart.items.all().delete()
 
             send_order_confirmation_email(request, order)
+            send_new_order_notification(request, order)
 
     return HttpResponse(status=200)
