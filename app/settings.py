@@ -124,6 +124,11 @@ STRIPE_WEBHOOK_SECRET = env("STRIPE_WEBHOOK_SECRET", default="")
 GOOGLE_OAUTH_CLIENT_ID = env("GOOGLE_OAUTH_CLIENT_ID", default="")
 GOOGLE_OAUTH_CLIENT_SECRET = env("GOOGLE_OAUTH_CLIENT_SECRET", default="")
 
+# --- Google Analytics (GA4) ---------------------------------------------
+# Measurement ID like "G-XXXXXXXXXX". Leave blank to disable. The tag only
+# loads after the visitor accepts analytics cookies in the cookie banner.
+GA_MEASUREMENT_ID = env("GA_MEASUREMENT_ID", default="")
+
 # --- Site / legal identity ----------------------------------------------
 # "Olivarium" is a trade name; the seller of record is a sole trader
 # (autónomo), not a company, per the AEAT censal certificate — so there's
@@ -138,7 +143,7 @@ SITE_EMAIL = CONTACT_EMAIL
 SITE_PHONE = "+34 674930646"
 # Sole traders register their activity (IAE) with the AEAT, not the
 # Registro Mercantil — shown on the Aviso Legal instead of a registry entry.
-SITE_IAE = "Epígrafe 845 — Explotación electrónica por terceros (alta: 02/04/2026)"
+SITE_IAE = "Epígrafe 665 — Comercio al por menor por correo o catálogo (alta: 15/09/2026)"
 
 # --- Shipping --------------------------------------------------------------
 DEFAULT_SHIPPING_FEE = env.str("DEFAULT_SHIPPING_FEE", default="4.95")

@@ -1,0 +1,24 @@
+{% if GA_MEASUREMENT_ID %}
+<script>
+  (function () {
+    var id = '{{ GA_MEASUREMENT_ID|escapejs }}';
+    var loaded = false;
+    function load() {
+      if (loaded) return;
+      loaded = true;
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () { dataLayer.push(arguments); };
+      gtag('js', new Date());
+      gtag('config', id, { anonymize_ip: true });
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(id);
+      document.head.appendChild(s);
+    }
+    try {
+      if (localStorage.getItem('cookie_consent') === 'accepted') load();
+    } catch (e) {}
+    window.addEventListener('cookie-consent-accepted', load);
+  })();
+</script>
+{% endif %}

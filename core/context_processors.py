@@ -11,5 +11,6 @@ def site(request):
         "SITE_PHONE": settings.SITE_PHONE,
         "SITE_IAE": settings.SITE_IAE,
         "STRIPE_PUBLISHABLE_KEY": settings.STRIPE_PUBLISHABLE_KEY,
+        "GA_MEASUREMENT_ID": settings.GA_MEASUREMENT_ID,
         "GOOGLE_OAUTH_ENABLED": bool(settings.GOOGLE_OAUTH_CLIENT_ID and settings.GOOGLE_OAUTH_CLIENT_SECRET),
     }

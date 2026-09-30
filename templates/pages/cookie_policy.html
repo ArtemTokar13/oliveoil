@@ -47,14 +47,35 @@
               <td class="px-4 py-3">Recordar tu elección sobre este aviso de cookies.</td>
               <td class="px-4 py-3">Local, sin caducidad</td>
             </tr>
+            {% if GA_MEASUREMENT_ID %}
+            <tr>
+              <td class="px-4 py-3 font-mono text-xs">_ga</td>
+              <td class="px-4 py-3">Analítica (Google Analytics)</td>
+              <td class="px-4 py-3">Distinguir visitantes de forma anónima para obtener estadísticas de uso.</td>
+              <td class="px-4 py-3">2 años</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-mono text-xs">_ga_*</td>
+              <td class="px-4 py-3">Analítica (Google Analytics)</td>
+              <td class="px-4 py-3">Mantener el estado de la sesión de análisis.</td>
+              <td class="px-4 py-3">2 años</td>
+            </tr>
+            {% endif %}
           </tbody>
         </table>
       </div>
       <p class="mt-3">
         Las cookies técnicas son necesarias para el funcionamiento de la tienda y no
-        requieren consentimiento. Si en el futuro incorporamos cookies analíticas o
-        publicitarias, actualizaremos esta política y solicitaremos tu consentimiento
-        explícito antes de instalarlas.
+        requieren consentimiento.
+        {% if GA_MEASUREMENT_ID %}
+        Las cookies analíticas las instala Google Analytics (Google Ireland Limited) solo
+        si las aceptas en el aviso de cookies, y nos ayudan a entender cómo se usa la
+        tienda. No las usamos con fines publicitarios. Más información en la
+        <a href="https://policies.google.com/privacy" class="text-ink underline underline-offset-2 hover:text-accent" target="_blank" rel="noopener">política de privacidad de Google</a>.
+        {% else %}
+        Si en el futuro incorporamos cookies analíticas o publicitarias, actualizaremos
+        esta política y solicitaremos tu consentimiento explícito antes de instalarlas.
+        {% endif %}
       </p>
     </div>
 
@@ -64,6 +85,13 @@
         Puedes eliminar o bloquear las cookies desde la configuración de tu navegador. Ten
         en cuenta que bloquear las cookies técnicas puede impedir el correcto funcionamiento
         de la tienda, incluyendo el carrito de la compra y el inicio de sesión.
+      </p>
+      <p class="mt-3">
+        Puedes cambiar tu elección en cualquier momento:
+        <button type="button" class="text-ink underline underline-offset-2 hover:text-accent"
+                onclick="try { localStorage.removeItem('cookie_consent'); } catch (e) {} location.reload();">
+          cambiar preferencias de cookies
+        </button>.
       </p>
     </div>
   </div>

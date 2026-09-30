@@ -8,6 +8,7 @@
     choose(value) {
       this.visible = false;
       try { localStorage.setItem('cookie_consent', value); } catch (e) {}
+      if (value === 'accepted') window.dispatchEvent(new CustomEvent('cookie-consent-accepted'));
     },
   }"
   x-show="visible" x-cloak
