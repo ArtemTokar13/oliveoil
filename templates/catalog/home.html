@@ -37,7 +37,11 @@
   {% if products %}
     <div class="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">
       {% for product in products %}
-        {% include "catalog/_product_card.html" %}
+        {% if forloop.counter <= 4 %}
+          {% include "catalog/_product_card.html" with eager=True %}
+        {% else %}
+          {% include "catalog/_product_card.html" %}
+        {% endif %}
       {% endfor %}
     </div>
 

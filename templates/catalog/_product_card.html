@@ -4,7 +4,7 @@
     {% with image=product.main_image %}
       {% if image %}
         <img src="{{ image.image.url }}" alt="{{ image.alt_text|default:product.name }}"
-             class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" loading="lazy">
+             class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"{% if not eager %} loading="lazy"{% endif %}>
       {% else %}
         <div class="flex h-full w-full items-center justify-center">
           <span class="font-display text-sm text-ink-muted">{{ product.name }}</span>

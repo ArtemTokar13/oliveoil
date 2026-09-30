@@ -1,3 +1,7 @@
+import io
+import os
+
+from django.core.files.base import ContentFile
 from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
@@ -119,3 +123,30 @@ class ProductImage(models.Model):
 
     def __str__(self):
         return self.alt_text or f"Imagen de {self.product.name}"
+
+    MAX_SIZE = (1200, 1600)
+
+    def save(self, *args, **kwargs):
+        if self.image:
+            self.shrink_image()
+        super().save(*args, **kwargs)
+
+    def shrink_image(self):
+        """Resize uploads to at most MAX_SIZE and store them as WebP, so the shop never serves camera-sized photos."""
+        from PIL import Image, ImageOps
+
+        img = Image.open(self.image)
+        if img.format == "WEBP" and img.width <= self.MAX_SIZE[0] and img.height <= self.MAX_SIZE[1]:
+            return
+        img = ImageOps.exif_transpose(img)
+        img.thumbnail(self.MAX_SIZE, Image.LANCZOS)
+        if img.mode not in ("RGB", "RGBA"):
+            img = img.convert("RGB")
+        buffer = io.BytesIO()
+        img.save(buffer, "WEBP", quality=80)
+
+        old_name = self.image.name if self.image._committed else None
+        stem = os.path.splitext(os.path.basename(self.image.name))[0]
+        self.image.save(f"{stem}.webp", ContentFile(buffer.getvalue()), save=False)
+        if old_name:
+            self.image.storage.delete(old_name)
