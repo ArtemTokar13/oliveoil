@@ -10,7 +10,8 @@ Resumen del pedido:
 - {{ item.quantity }} x {{ item.product_name }} ({{ item.product_volume }}) — {{ item.line_total|eur }}
 {% endfor %}
 Subtotal: {{ order.subtotal|eur }}
-Envío: {{ order.shipping_cost|eur }}
+{% if order.discount_amount %}Descuento{% if order.discount_code %} ({{ order.discount_code.code }}){% endif %}: −{{ order.discount_amount|eur }}
+{% endif %}Envío: {{ order.shipping_cost|eur }}
 Total: {{ order.total|eur }}
 
 Enviamos a:
@@ -21,6 +22,11 @@ Enviamos a:
 {% if order.is_local_delivery %}
 Tu pedido entra en nuestra zona de reparto local gratuito y se entrega en mano
 {% if order.local_delivery_date %}el {{ order.local_delivery_date|date:"d \d\e F" }}{% else %}en la próxima ronda semanal{% endif %}.
+{% endif %}
+{% if loyalty_code %}
+UN REGALO PARA TU PRÓXIMA COMPRA
+Usa el código {{ loyalty_code.code }} y obtén un {{ loyalty_code.percent.normalize }} % de descuento en tu próximo pedido.
+Válido hasta el {{ loyalty_code.expires_at|date:"d/m/Y" }}, una sola vez, con este mismo correo.
 {% endif %}
 Gracias por tu compra.
 — {{ SITE_NAME }}

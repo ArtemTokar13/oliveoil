@@ -50,6 +50,7 @@
     </div>
     <div class="space-y-1.5 border-t border-border px-6 py-4 text-sm">
       <div class="flex justify-between text-ink-muted"><span>Subtotal</span><span class="price">{{ order.subtotal|eur }}</span></div>
+      {% if order.discount_amount %}<div class="flex justify-between text-accent-2"><span>Descuento{% if order.discount_code %} <span class="font-mono text-xs">{{ order.discount_code.code }}</span>{% endif %}</span><span class="price">−{{ order.discount_amount|eur }}</span></div>{% endif %}
       <div class="flex justify-between text-ink-muted"><span>Envío</span><span class="price">{{ order.shipping_cost|eur }}</span></div>
       <div class="flex justify-between text-base font-semibold text-ink"><span>Total</span><span class="price">{{ order.total|eur }}</span></div>
     </div>
@@ -66,6 +67,18 @@
       </div>
     {% endif %}
   </div>
+
+  {% if order.status == "PAID" and loyalty_code %}
+    <div class="mt-8 border border-accent-2 bg-accent-2/10 p-6">
+      <h2 class="font-display text-lg font-semibold text-ink">Un regalo para tu próxima compra</h2>
+      <p class="mt-2 text-sm text-ink-muted">
+        Usa este código y obtén un <strong class="text-ink">{{ loyalty_code.percent.normalize }} % de descuento</strong>
+        en tu próximo pedido. Válido hasta el {{ loyalty_code.expires_at|date:"d \d\e F \d\e Y" }},
+        con el correo {{ loyalty_code.email }}.
+      </p>
+      <p class="mt-4 font-mono text-2xl font-semibold tracking-widest text-accent-2">{{ loyalty_code.code }}</p>
+    </div>
+  {% endif %}
 
   {% if order.status == "PAID" and not order.user_id and not request.user.is_authenticated %}
     <div class="mt-8 border border-dashed border-border p-6">

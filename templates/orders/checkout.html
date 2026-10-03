@@ -11,7 +11,7 @@
 
   <div class="mt-8 grid gap-10 lg:grid-cols-3"
        x-data="checkoutAddress(JSON.parse(document.getElementById('checkout-init-data').textContent))">
-    <form method="post" class="lg:col-span-2">
+    <form method="post" id="checkout-form" class="lg:col-span-2">
       {% csrf_token %}
 
       <h2 class="font-display text-lg font-semibold text-ink">Dirección de envío</h2>
@@ -106,15 +106,40 @@
           <dt class="text-ink-muted">Subtotal</dt>
           <dd class="price text-ink">{{ subtotal|eur }}</dd>
         </div>
+        {% if discount_code %}
+          <div class="flex justify-between text-accent-2">
+            <dt>Descuento <span class="font-mono text-xs">{{ discount_code.code }}</span> (−{{ discount_code.percent.normalize }} %)</dt>
+            <dd class="price">−{{ discount_amount|eur }}</dd>
+          </div>
+        {% endif %}
         <div class="flex justify-between">
           <dt class="text-ink-muted">Envío</dt>
           <dd class="price text-ink" x-text="shippingCost ? formatEur(shippingCost) : 'Gratis'">{% if shipping_cost %}{{ shipping_cost|eur }}{% else %}Gratis{% endif %}</dd>
         </div>
         <div class="flex justify-between border-t border-border pt-2 text-base font-semibold">
           <dt>Total</dt>
-          <dd class="price" x-text="formatEur(subtotal + shippingCost)">{{ total|eur }}</dd>
+          <dd class="price" x-text="formatEur(subtotal - discount + shippingCost)">{{ total|eur }}</dd>
         </div>
       </dl>
+      {# Fields live in the sidebar but belong to the main form (form="…"), so
+         applying a code keeps everything already typed in the address form. #}
+      <div class="mt-6 border-t border-border pt-4">
+        {% if discount_code %}
+          <button type="submit" name="action" value="remove_discount" form="checkout-form" formnovalidate
+                  class="text-xs text-ink-muted hover:text-accent hover:underline">Quitar el código de descuento</button>
+        {% else %}
+          <label for="discount_code" class="field-label">¿Tienes un código de descuento?</label>
+          <div class="mt-1 flex gap-2">
+            <input type="text" name="discount_code" id="discount_code" form="checkout-form"
+                   value="{{ request.POST.discount_code|default:'' }}" placeholder="OLIV-XXXXXX"
+                   autocomplete="off" autocapitalize="characters" class="field-input font-mono uppercase">
+            <button type="submit" name="action" value="apply_discount" form="checkout-form" formnovalidate
+                    class="btn-secondary">Aplicar</button>
+          </div>
+          {% if discount_error %}<p class="field-error">{{ discount_error }}</p>{% endif %}
+        {% endif %}
+      </div>
+
       <p x-show="isLocalZone" x-cloak class="mt-4 text-xs text-accent-2">
         Envío gratuito · reparto local semanal{% if next_local_delivery_date %} · próxima entrega
         el {{ next_local_delivery_date|date:"d \d\e F" }}{% endif %}
@@ -133,6 +158,7 @@
       addressPostals: init.addressPostals,
       zoneCodes: init.zoneCodes,
       subtotal: init.subtotal,
+      discount: init.discount,
       flatFee: init.flatFee,
       freeThreshold: init.freeThreshold,
       get selectedPostal() {

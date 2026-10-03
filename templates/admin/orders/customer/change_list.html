@@ -1,0 +1,87 @@
+{% extends "admin/base_site.html" %}
+{% load shop_extras %}
+
+{% block extrastyle %}{{ block.super }}
+<style>
+  .cust-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 20px; }
+  .cust-tiles div { border: 1px solid var(--hairline-color); background: var(--darkened-bg); padding: 12px 14px; border-radius: 4px; }
+  .cust-tiles .label { color: var(--body-quiet-color); font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
+  .cust-tiles .value { font-size: 1.4rem; font-weight: 600; margin-top: 4px; }
+  .cust-toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 12px; }
+  .cust-toolbar .sorts a { margin-right: 10px; }
+  .cust-toolbar .sorts a.active { font-weight: 700; text-decoration: underline; }
+  #result_list td.num, #result_list th.num { text-align: right; }
+  .muted { color: var(--body-quiet-color); }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">Inicio</a> › <a href="{% url 'admin:app_list' 'orders' %}">{{ opts.app_config.verbose_name }}</a> › Clientes
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <div class="cust-tiles">
+    <div><div class="label">Clientes</div><div class="value">{{ summary.total }}</div></div>
+    <div><div class="label">Han comprado</div><div class="value">{{ summary.buyers }}</div></div>
+    <div><div class="label">Repiten (2+ pedidos)</div><div class="value">{{ summary.repeat }} <span class="muted" style="font-size:.9rem">({{ summary.repeat_rate }} %)</span></div></div>
+    <div><div class="label">Con cuenta</div><div class="value">{{ summary.accounts }}</div></div>
+    <div><div class="label">Ingresos totales</div><div class="value">{{ summary.revenue|eur }}</div></div>
+    <div><div class="label">Pedido medio</div><div class="value">{{ summary.avg_order|eur }}</div></div>
+  </div>
+
+  <div class="cust-toolbar">
+    <form method="get">
+      <input type="text" name="q" value="{{ query }}" placeholder="Correo, nombre o teléfono" size="30">
+      <input type="hidden" name="o" value="{{ sort }}">
+      <input type="submit" value="Buscar">
+    </form>
+    <div class="sorts">Ordenar por:
+      {% for key, label in sorts %}
+        <a href="?o={{ key }}{% if query %}&q={{ query|urlencode }}{% endif %}" class="{% if key == sort %}active{% endif %}">{{ label }}</a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="results">
+    <table id="result_list">
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Teléfono</th>
+          <th>Cuenta</th>
+          <th class="num">Pedidos</th>
+          <th class="num">Total gastado</th>
+          <th class="num">Pedido medio</th>
+          <th>Primer pedido</th>
+          <th>Último pedido</th>
+          <th>Código activo</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+          <tr>
+            <td>
+              {% if r.name %}<strong>{{ r.name }}</strong><br>{% endif %}
+              {% if r.order_count %}<a href="{{ r.orders_url }}">{{ r.email }}</a>{% else %}{{ r.email }}{% endif %}
+            </td>
+            <td>{{ r.phone|default:"—" }}</td>
+            <td>{% if r.has_account %}Sí{% else %}<span class="muted">Invitado</span>{% endif %}</td>
+            <td class="num">{{ r.order_count }}</td>
+            <td class="num">{{ r.total_spent|eur }}</td>
+            <td class="num">{% if r.avg_order is not None %}{{ r.avg_order|eur }}{% else %}—{% endif %}</td>
+            <td>{{ r.first_order|date:"d/m/Y"|default:"—" }}</td>
+            <td>{{ r.last_order|date:"d/m/Y"|default:"—" }}</td>
+            <td>{% if r.has_active_code %}Sí{% else %}<span class="muted">—</span>{% endif %}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="9" class="muted">No hay clientes{% if query %} que coincidan con «{{ query }}»{% endif %}.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p class="paginator">{{ rows|length }} cliente{{ rows|length|pluralize }}</p>
+  </div>
+</div>
+{% endblock %}

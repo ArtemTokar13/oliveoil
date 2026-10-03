@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
@@ -224,9 +225,15 @@ def claim_order(request, token):
 
 @login_required
 def dashboard(request):
+    from orders.models import DiscountCode
     addresses = request.user.addresses.all()
     orders = request.user.orders.all()[:5]
-    return render(request, "accounts/dashboard.html", {"addresses": addresses, "orders": orders})
+    discount_codes = DiscountCode.objects.filter(
+        email=request.user.email.lower(), used_at__isnull=True, expires_at__gt=timezone.now(),
+    )
+    return render(request, "accounts/dashboard.html", {
+        "addresses": addresses, "orders": orders, "discount_codes": discount_codes,
+    })
 
 
 @login_required

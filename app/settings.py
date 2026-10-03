@@ -145,6 +145,11 @@ SITE_PHONE = "+34 674930646"
 # Registro Mercantil — shown on the Aviso Legal instead of a registry entry.
 SITE_IAE = "Epígrafe 665 — Comercio al por menor por correo o catálogo (alta: 15/09/2026)"
 
+# --- Loyalty ---------------------------------------------------------------
+# Every paid order earns a single-use code for the customer's next purchase.
+LOYALTY_DISCOUNT_PERCENT = env.str("LOYALTY_DISCOUNT_PERCENT", default="5")
+LOYALTY_DISCOUNT_VALID_DAYS = env.int("LOYALTY_DISCOUNT_VALID_DAYS", default=60)
+
 # --- Shipping --------------------------------------------------------------
 DEFAULT_SHIPPING_FEE = env.str("DEFAULT_SHIPPING_FEE", default="4.95")
 

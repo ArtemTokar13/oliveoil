@@ -9,7 +9,8 @@ Artículos:
 - {{ item.quantity }} x {{ item.product_name }} ({{ item.product_volume }}) — {{ item.line_total|eur }}
 {% endfor %}
 Subtotal: {{ order.subtotal|eur }}
-Envío: {{ order.shipping_cost|eur }}
+{% if order.discount_amount %}Descuento{% if order.discount_code %} ({{ order.discount_code.code }}){% endif %}: −{{ order.discount_amount|eur }}
+{% endif %}Envío: {{ order.shipping_cost|eur }}
 Total: {{ order.total|eur }}
 
 Dirección de envío:

@@ -1,6 +1,7 @@
+import secrets
 import uuid
 from datetime import timedelta
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 
 from django.conf import settings
 from django.db import models
@@ -131,8 +132,22 @@ class Order(models.Model):
     shipping_country = models.CharField("país", max_length=100, default="España")
 
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
+    discount_code = models.ForeignKey(
+        "DiscountCode", verbose_name="código de descuento", related_name="orders",
+        on_delete=models.SET_NULL, null=True, blank=True,
+    )
+    discount_amount = models.DecimalField("descuento", max_digits=8, decimal_places=2, default=Decimal("0"))
     shipping_cost = models.DecimalField(max_digits=8, decimal_places=2)
     total = models.DecimalField(max_digits=10, decimal_places=2)
+
+    tracking_number = models.CharField(
+        "número de seguimiento", max_length=100, blank=True,
+        help_text="Se incluye en el correo al cliente cuando el pedido pasa a «Enviado».",
+    )
+    tracking_url = models.URLField(
+        "enlace de seguimiento", blank=True,
+        help_text="Enlace a la web del transportista para seguir el envío (opcional).",
+    )
 
     # Snapshotted at order creation (not recomputed from ShippingSettings on
     # every view) so the date shown to the customer never drifts as weeks pass.
@@ -203,3 +218,76 @@ class OrderItem(models.Model):
     @property
     def line_total(self):
         return self.unit_price * self.quantity
+
+
+def _generate_discount_code():
+    # No 0/O, 1/I/L — codes get read off a phone and typed by hand.
+    alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
+    while True:
+        code = "OLIV-" + "".join(secrets.choice(alphabet) for _ in range(6))
+        if not DiscountCode.objects.filter(code=code).exists():
+            return code
+
+
+def _default_discount_expiry():
+    return timezone.now() + timedelta(days=settings.LOYALTY_DISCOUNT_VALID_DAYS)
+
+
+class DiscountCode(models.Model):
+    """Single-use, percentage-off-products code tied to one customer email.
+    Issued automatically after every paid order ("X % en tu próxima compra")
+    and can also be created by hand in the admin."""
+
+    code = models.CharField("código", max_length=20, unique=True, blank=True,
+                            help_text="Déjalo en blanco para generarlo automáticamente.")
+    email = models.EmailField("correo del cliente", help_text="Solo se puede usar en pedidos con este correo.")
+    percent = models.DecimalField("descuento (%)", max_digits=5, decimal_places=2,
+                                  default=Decimal("5"))
+    expires_at = models.DateTimeField("válido hasta", default=_default_discount_expiry)
+    issued_for_order = models.ForeignKey(
+        Order, verbose_name="emitido por el pedido", related_name="issued_discount_codes",
+        on_delete=models.SET_NULL, null=True, blank=True,
+    )
+    used_at = models.DateTimeField("usado el", null=True, blank=True)
+    created_at = models.DateTimeField("creado el", auto_now_add=True)
+
+    class Meta:
+        verbose_name = "código de descuento"
+        verbose_name_plural = "códigos de descuento"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.code
+
+    def save(self, *args, **kwargs):
+        self.email = self.email.strip().lower()
+        if not self.code:
+            self.code = _generate_discount_code()
+        self.code = self.code.strip().upper()
+        super().save(*args, **kwargs)
+
+    @property
+    def is_used(self):
+        return self.used_at is not None
+
+    @property
+    def is_expired(self):
+        return timezone.now() >= self.expires_at
+
+    @property
+    def is_active(self):
+        return not self.is_used and not self.is_expired
+
+    def discount_for(self, subtotal):
+        return (Decimal(subtotal) * self.percent / 100).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+
+class Customer(Order):
+    """Admin-only stand-in so "Clientes" shows up in the admin sidebar —
+    its changelist is a custom aggregated view (see CustomerAdmin), since a
+    customer isn't a table: guests only exist as an email on their orders."""
+
+    class Meta:
+        proxy = True
+        verbose_name = "cliente"
+        verbose_name_plural = "clientes"

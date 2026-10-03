@@ -32,6 +32,21 @@
     </div>
   </div>
 
+  {% if discount_codes %}
+    <div class="mt-8 border border-accent-2 bg-accent-2/10 p-6">
+      <h2 class="font-display text-lg font-semibold text-ink">Tus códigos de descuento</h2>
+      <div class="mt-3 divide-y divide-border">
+        {% for code in discount_codes %}
+          <div class="flex flex-wrap items-center justify-between gap-2 py-3 text-sm">
+            <span class="font-mono text-base font-semibold tracking-widest text-accent-2">{{ code.code }}</span>
+            <span class="text-ink-muted">{{ code.percent.normalize }} % de descuento · válido hasta el {{ code.expires_at|date:"d/m/Y" }}</span>
+          </div>
+        {% endfor %}
+      </div>
+      <p class="mt-2 text-xs text-ink-muted">Introdúcelo al finalizar la compra. Cada código se puede usar una vez.</p>
+    </div>
+  {% endif %}
+
   <div class="mt-8 border border-border p-6">
     <div class="flex items-center justify-between">
       <h2 class="font-display text-lg font-semibold text-ink">Pedidos recientes</h2>

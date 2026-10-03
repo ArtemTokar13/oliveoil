@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 import stripe
 from django.conf import settings
 from django.contrib import messages
@@ -23,9 +25,14 @@ from .services import (
     build_line_items,
     create_order,
     create_stripe_checkout_session,
+    find_discount_code,
+    issue_loyalty_code,
+    mark_discount_code_used,
     send_new_order_notification,
     send_order_confirmation_email,
 )
+
+DISCOUNT_SESSION_KEY = "discount_code"
 
 
 @require_POST
@@ -59,8 +66,40 @@ def checkout(request):
     new_address_values = {}
     guest_email = ""
     guest_email_error = None
+    discount_error = None
+    selected_address_id = None
 
-    if request.method == "POST":
+    # A code applied earlier in this session — dropped quietly if it has
+    # since been used or expired (e.g. it was spent on the previous order).
+    discount_code = None
+    if request.session.get(DISCOUNT_SESSION_KEY):
+        discount_code, _ = find_discount_code(request.session[DISCOUNT_SESSION_KEY])
+        if discount_code is None:
+            request.session.pop(DISCOUNT_SESSION_KEY, None)
+
+    action = request.POST.get("action") if request.method == "POST" else None
+
+    if action in ("apply_discount", "remove_discount"):
+        # Re-render with whatever was typed so far, without validating the
+        # address — the customer hasn't finished filling it in yet.
+        guest_email = request.POST.get("email", "").strip().lower()
+        new_address_values = address_fields_from_post(request.POST)
+        selected_address_id = request.POST.get("address_id")
+        if action == "remove_discount":
+            request.session.pop(DISCOUNT_SESSION_KEY, None)
+            discount_code = None
+        else:
+            email = request.user.email if not is_guest else guest_email
+            if is_guest and not email:
+                discount_error = "Introduce primero tu correo electrónico: el código va asociado a él."
+            else:
+                found, discount_error = find_discount_code(request.POST.get("discount_code"), email=email)
+                if found:
+                    discount_code = found
+                    request.session[DISCOUNT_SESSION_KEY] = found.code
+                    messages.success(request, f"Código {found.code} aplicado: {found.percent.normalize()} % de descuento.")
+
+    elif request.method == "POST":
         shipping_fields = None
         email = None
 
@@ -91,10 +130,28 @@ def checkout(request):
                 messages.error(request, "Selecciona o añade una dirección de envío.")
             email = request.user.email
 
+        selected_address_id = request.POST.get("address_id")
+
+        # A code typed in but never "applied" still counts.
+        if shipping_fields and not discount_code and request.POST.get("discount_code", "").strip():
+            discount_code, discount_error = find_discount_code(request.POST["discount_code"], email=email)
+            if discount_error:
+                shipping_fields = None
+            else:
+                request.session[DISCOUNT_SESSION_KEY] = discount_code.code
+
+        # Re-check the applied code against the final email — a guest may
+        # have changed the email field after applying it.
+        if shipping_fields and discount_code:
+            discount_code, discount_error = find_discount_code(discount_code.code, email=email)
+            if discount_error:
+                request.session.pop(DISCOUNT_SESSION_KEY, None)
+                shipping_fields = None
+
         if shipping_fields:
             try:
                 with transaction.atomic():
-                    order = create_order(request, shipping_fields, email=email)
+                    order = create_order(request, shipping_fields, email=email, discount_code=discount_code)
                     session = create_stripe_checkout_session(request, order)
             except CheckoutError as exc:
                 messages.error(request, str(exc))
@@ -104,7 +161,8 @@ def checkout(request):
                 request.session.pop("buy_now", None)
                 return redirect(session.url)
 
-    subtotal = sum((product.price * quantity for product, quantity in line_items), start=0)
+    subtotal = sum((product.price * quantity for product, quantity in line_items), start=Decimal("0"))
+    discount_amount = discount_code.discount_for(subtotal) if discount_code else Decimal("0")
     shipping_settings = ShippingSettings.get_solo()
     default_address = next((a for a in addresses if a.is_default), None) or (addresses[0] if addresses else None)
     preview_postal_code = default_address.postal_code if default_address else new_address_values.get("postal_code")
@@ -113,7 +171,12 @@ def checkout(request):
 
     # Only truly "existing" when a saved address is preselected without errors —
     # otherwise the "new address" form is what's shown, so that's the active mode.
-    if is_guest or new_address_errors or not default_address:
+    # After a re-render (applying a code), keep whatever the customer had picked.
+    if is_guest:
+        initial_mode = "new"
+    elif selected_address_id and (selected_address_id == "new" or any(str(a.id) == selected_address_id for a in addresses)):
+        initial_mode = selected_address_id
+    elif new_address_errors or not default_address:
         initial_mode = "new"
     else:
         initial_mode = str(default_address.id)
@@ -122,8 +185,11 @@ def checkout(request):
         "addresses": addresses,
         "line_items": line_items,
         "subtotal": subtotal,
+        "discount_code": discount_code,
+        "discount_amount": discount_amount,
+        "discount_error": discount_error,
         "shipping_cost": shipping_cost,
-        "total": subtotal + shipping_cost,
+        "total": subtotal - discount_amount + shipping_cost,
         "new_address_errors": new_address_errors,
         "new_address_values": new_address_values,
         "is_guest": is_guest,
@@ -137,6 +203,7 @@ def checkout(request):
             "addressPostals": {str(a.id): a.postal_code for a in addresses},
             "zoneCodes": local_delivery_postal_codes,
             "subtotal": float(subtotal),
+            "discount": float(discount_amount),
             "flatFee": float(shipping_settings.flat_fee),
             "freeThreshold": (
                 float(shipping_settings.free_shipping_threshold)
@@ -160,7 +227,8 @@ def order_status(request, token):
     # payment, and it's the only way a guest (no account) can ever see
     # their order again, so it has to work without being signed in.
     order = get_object_or_404(Order, access_token=token)
-    return render(request, "orders/confirmation.html", {"order": order})
+    loyalty_code = order.issued_discount_codes.filter(used_at__isnull=True).first()
+    return render(request, "orders/confirmation.html", {"order": order, "loyalty_code": loyalty_code})
 
 
 @login_required
@@ -225,7 +293,10 @@ def stripe_webhook(request):
                     if cart:
                         cart.items.all().delete()
 
-            send_order_confirmation_email(request, order)
+                mark_discount_code_used(order)
+                loyalty_code = issue_loyalty_code(order)
+
+            send_order_confirmation_email(request, order, loyalty_code=loyalty_code)
             send_new_order_notification(request, order)
 
     return HttpResponse(status=200)

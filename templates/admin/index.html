@@ -1,0 +1,114 @@
+{% extends "admin/index.html" %}
+{% load order_admin shop_extras %}
+
+{% block extrastyle %}{{ block.super }}
+<style>
+  .shop-dash { margin-bottom: 30px; }
+  .shop-dash h2 { margin: 0 0 10px; font-size: 1rem; font-weight: 600; }
+  .shop-dash .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 20px; }
+  .shop-dash .tile { border: 1px solid var(--hairline-color); background: var(--darkened-bg); padding: 12px 14px; border-radius: 4px; }
+  .shop-dash .tile .label { color: var(--body-quiet-color); font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
+  .shop-dash .tile .value { font-size: 1.5rem; font-weight: 600; color: var(--body-fg); margin-top: 4px; }
+  .shop-dash .tile .sub { color: var(--body-quiet-color); font-size: .8rem; margin-top: 2px; }
+  .shop-dash .tile.alert { border-color: var(--message-warning-bg, #ffc); background: var(--message-warning-bg, #ffc); }
+  .shop-dash .tile a { color: inherit; }
+  .shop-dash .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+  .shop-dash table { width: 100%; }
+  .shop-dash .empty { color: var(--body-quiet-color); }
+</style>
+{% endblock %}
+
+{% block content %}
+{% admin_dashboard_stats as s %}
+<div class="shop-dash">
+  <h2>Ventas (pedidos pagados)</h2>
+  <div class="tiles">
+    {% for label, p in s.periods %}
+      <div class="tile">
+        <div class="label">{{ label }}</div>
+        <div class="value">{{ p.revenue|eur }}</div>
+        <div class="sub">{{ p.count }} pedido{{ p.count|pluralize }}</div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <h2>Pedidos por gestionar</h2>
+  <div class="tiles">
+    <div class="tile{% if s.received %} alert{% endif %}">
+      <a href="{% url 'admin:orders_order_changelist' %}?status__exact=PAID&fulfillment_status__exact=RECEIVED">
+        <div class="label">Nuevos (recibidos)</div>
+        <div class="value">{{ s.received }}</div>
+        <div class="sub">pendientes de preparar →</div>
+      </a>
+    </div>
+    <div class="tile">
+      <a href="{% url 'admin:orders_order_changelist' %}?status__exact=PAID&fulfillment_status__exact=PROCESSING">
+        <div class="label">En preparación</div>
+        <div class="value">{{ s.processing }}</div>
+        <div class="sub">pendientes de enviar →</div>
+      </a>
+    </div>
+    <div class="tile">
+      <a href="{% url 'admin:orders_order_changelist' %}?status__exact=PAID&fulfillment_status__exact=SHIPPED">
+        <div class="label">Enviados</div>
+        <div class="value">{{ s.shipped }}</div>
+        <div class="sub">en camino →</div>
+      </a>
+    </div>
+    <div class="tile">
+      <div class="label">Pagos no completados</div>
+      <div class="value">{{ s.abandoned_7d }}</div>
+      <div class="sub">últimos 7 días</div>
+    </div>
+  </div>
+
+  <div class="cols">
+    <div class="module">
+      <table>
+        <caption>Reparto local pendiente</caption>
+        {% for d in s.local_upcoming %}
+          <tr><td>{{ d.local_delivery_date|date:"l d/m"|default:"Sin fecha" }}</td><td style="text-align:right">{{ d.count }} pedido{{ d.count|pluralize }}</td></tr>
+        {% empty %}
+          <tr><td class="empty">No hay repartos locales pendientes.</td></tr>
+        {% endfor %}
+      </table>
+    </div>
+
+    <div class="module">
+      <table>
+        <caption>Stock bajo (≤ {{ s.low_stock_threshold }})</caption>
+        {% for p in s.low_stock %}
+          <tr>
+            <td><a href="{% url 'admin:catalog_product_change' p.pk %}">{{ p }}</a></td>
+            <td style="text-align:right">{% if p.stock %}{{ p.stock }} ud.{% else %}<strong>Agotado</strong>{% endif %}</td>
+          </tr>
+        {% empty %}
+          <tr><td class="empty">Todo el catálogo activo tiene stock suficiente.</td></tr>
+        {% endfor %}
+      </table>
+    </div>
+
+    <div class="module">
+      <table>
+        <caption>Más vendidos (30 días)</caption>
+        {% for p in s.top_products %}
+          <tr><td>{{ p.product_name }} ({{ p.product_volume }})</td><td style="text-align:right">{{ p.units }} ud. · {{ p.revenue|eur }}</td></tr>
+        {% empty %}
+          <tr><td class="empty">Aún no hay ventas en los últimos 30 días.</td></tr>
+        {% endfor %}
+      </table>
+    </div>
+
+    <div class="module">
+      <table>
+        <caption>Fidelización</caption>
+        <tr><td>Códigos emitidos tras una compra</td><td style="text-align:right">{{ s.loyalty.issued }}</td></tr>
+        <tr><td>Códigos usados (clientes que repiten)</td><td style="text-align:right">{{ s.loyalty.used }} ({{ s.loyalty.rate }} %)</td></tr>
+        <tr><td>Total descontado</td><td style="text-align:right">{{ s.loyalty.discount_total|eur }}</td></tr>
+        <tr><td colspan="2"><a href="{% url 'admin:orders_customer_changelist' %}">Ver clientes →</a> · <a href="{% url 'admin:orders_discountcode_changelist' %}">Ver códigos →</a></td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+{{ block.super }}
+{% endblock %}

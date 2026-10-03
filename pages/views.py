@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.conf import settings
@@ -60,13 +60,14 @@ def contact(request):
         if not errors:
             ContactMessage.objects.create(**values)
             try:
-                send_mail(
+                EmailMessage(
                     subject=f"[Contacto] {values['subject']}",
-                    message=f"De: {values['name']} <{values['email']}>\n\n{values['message']}",
+                    body=f"De: {values['name']} <{values['email']}>\n\n{values['message']}",
                     from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[settings.CONTACT_EMAIL],
-                    fail_silently=True,
-                )
+                    to=[settings.CONTACT_EMAIL],
+                    # So "Reply" in the inbox goes straight to the visitor.
+                    reply_to=[values["email"]],
+                ).send(fail_silently=True)
             except Exception:
                 pass
             messages.success(request, "Gracias por tu mensaje. Te responderemos lo antes posible.")

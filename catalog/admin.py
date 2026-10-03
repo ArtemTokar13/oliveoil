@@ -45,6 +45,35 @@ class ProductImageInline(admin.TabularInline):
         return "—"
 
 
+class StockFilter(admin.SimpleListFilter):
+    title = "stock"
+    parameter_name = "stock_level"
+
+    def lookups(self, request, model_admin):
+        return [("out", "Agotado"), ("low", "Stock bajo (1–3)"), ("ok", "Con stock (4+)")]
+
+    def queryset(self, request, queryset):
+        if self.value() == "out":
+            return queryset.filter(stock=0)
+        if self.value() == "low":
+            return queryset.filter(stock__gte=1, stock__lte=3)
+        if self.value() == "ok":
+            return queryset.filter(stock__gte=4)
+        return queryset
+
+
+@admin.action(description="Mostrar en la tienda")
+def make_active(modeladmin, request, queryset):
+    updated = queryset.update(is_active=True)
+    modeladmin.message_user(request, f"{updated} producto(s) visibles en la tienda.")
+
+
+@admin.action(description="Ocultar de la tienda")
+def make_inactive(modeladmin, request, queryset):
+    updated = queryset.update(is_active=False)
+    modeladmin.message_user(request, f"{updated} producto(s) ocultos de la tienda.")
+
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = (
@@ -52,7 +81,8 @@ class ProductAdmin(admin.ModelAdmin):
         "price", "stock", "is_active", "harvest_year",
     )
     list_display_links = ("thumbnail", "name")
-    list_filter = ("brand", "category", "volume", "is_active")
+    list_filter = ("is_active", StockFilter, "brand", "category", "volume")
+    actions = [make_active, make_inactive]
     search_fields = ("name", "brand__name", "origin_region")
     list_editable = ("price", "stock", "is_active")
     prepopulated_fields = {"slug": ("name",)}

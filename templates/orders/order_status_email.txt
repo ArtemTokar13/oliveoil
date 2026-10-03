@@ -1,0 +1,23 @@
+{% load shop_extras %}{% autoescape off %}Hola{% if order.shipping_full_name %}, {{ order.shipping_full_name }}{% endif %},
+{% if order.fulfillment_status == "PROCESSING" %}
+Ya estamos preparando tu pedido #{{ order.order_number }}.{% if order.is_local_delivery and order.local_delivery_date %} Te lo entregaremos en mano el {{ order.local_delivery_date|date:"l d \d\e F" }}.{% else %} Te avisaremos en cuanto salga hacia tu dirección.{% endif %}
+{% elif order.fulfillment_status == "SHIPPED" %}{% if order.is_local_delivery %}
+Tu pedido #{{ order.order_number }} ha salido en nuestra ronda de reparto local y llegará pronto a tu dirección.
+{% else %}
+Tu pedido #{{ order.order_number }} ya está en camino.
+{% if order.tracking_number %}
+Número de seguimiento: {{ order.tracking_number }}{% endif %}{% if order.tracking_url %}
+Sigue tu envío aquí: {{ order.tracking_url }}{% endif %}
+{% endif %}{% elif order.fulfillment_status == "DELIVERED" %}
+Tu pedido #{{ order.order_number }} ha sido entregado. ¡Esperamos que disfrutes de tu aceite!
+
+Si hay algún problema con el pedido, responde a este correo y lo solucionamos.
+{% if loyalty_code %}
+Recuerda: con el código {{ loyalty_code.code }} tienes un {{ loyalty_code.percent.normalize }} % de descuento en tu próxima compra (válido hasta el {{ loyalty_code.expires_at|date:"d/m/Y" }}).
+{% endif %}{% endif %}
+Puedes ver el estado de tu pedido en cualquier momento aquí:
+{{ status_url }}
+
+Un saludo,
+— {{ SITE_NAME }}
+{% endautoescape %}
