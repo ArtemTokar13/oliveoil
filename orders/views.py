@@ -184,6 +184,7 @@ def checkout(request):
     return render(request, "orders/checkout.html", {
         "addresses": addresses,
         "line_items": line_items,
+        "summary_items": [(product, quantity, product.price * quantity) for product, quantity in line_items],
         "subtotal": subtotal,
         "discount_code": discount_code,
         "discount_amount": discount_amount,
