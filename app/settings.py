@@ -107,9 +107,9 @@ EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="Aceite de Oliva <no-reply@example.com>")
-CONTACT_EMAIL = env("CONTACT_EMAIL", default="hola@example.com")
+CONTACT_EMAIL = env("CONTACT_EMAIL", default="info@olivarium.es")
 # Who gets the "new paid order" notification.
-ORDER_NOTIFICATION_EMAILS = env.list("ORDER_NOTIFICATION_EMAILS", default=["artemtokartouch@gmail.com"])
+ORDER_NOTIFICATION_EMAILS = env.list("ORDER_NOTIFICATION_EMAILS", default=["olivarium.castellon@gmail.com"])
 
 # --- Stripe -------------------------------------------------------------
 STRIPE_PUBLISHABLE_KEY = env("STRIPE_PUBLISHABLE_KEY", default="")
