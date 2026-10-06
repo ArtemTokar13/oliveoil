@@ -4,8 +4,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}{{ SITE_NAME }} — Aceite de oliva español{% endblock %}</title>
-  <meta name="description" content="{% block meta_description %}Aceite de oliva cuidadosamente seleccionado de productores españoles.{% endblock %}">
+  <title>{% block title %}{{ SITE_NAME }} — Aceite de oliva virgen extra español · Tienda online{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}Tienda online de aceite de oliva virgen extra español, seleccionado de productores y cooperativas. Envío a toda España y reparto local gratuito en Castellón.{% endblock %}">
+  {% if NOINDEX %}
+    <meta name="robots" content="noindex, nofollow">
+  {% else %}
+    <link rel="canonical" href="{% block canonical %}{{ SITE_URL }}{{ request.path }}{% endblock %}">
+  {% endif %}
+
+  {# Open Graph / Twitter — the preview card when a link is shared (WhatsApp, Instagram, Facebook…) #}
+  <meta property="og:site_name" content="{{ SITE_NAME }}">
+  <meta property="og:locale" content="es_ES">
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+  <meta property="og:url" content="{{ SITE_URL }}{{ request.path }}">
+  <meta property="og:title" content="{% block og_title %}{{ SITE_NAME }} — Aceite de oliva virgen extra español{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}Aceite de oliva virgen extra seleccionado de productores españoles. Envío a toda España.{% endblock %}">
+  {% block og_image %}{% endblock %}
+  <meta name="twitter:card" content="summary_large_image">
+  {% block og_extra %}{% endblock %}
+  {% block structured_data %}{% endblock %}
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

@@ -1,6 +1,13 @@
 {% extends "base.html" %}
 {% load shop_extras %}
 
+{% block og_image %}{% with image=products.0.main_image %}{% if image %}
+  <meta property="og:image" content="{{ SITE_URL }}{{ image.image.url }}">{% endif %}{% endwith %}
+{% endblock %}
+{% block structured_data %}{% for item in structured_data %}
+  <script type="application/ld+json">{{ item|jsonld }}</script>{% endfor %}
+{% endblock %}
+
 {% block content %}
 <section class="border-b border-border bg-surface">
   <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">

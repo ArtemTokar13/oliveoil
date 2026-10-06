@@ -2,6 +2,7 @@ from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, render
 
 from .models import Brand, Category, Product
+from .seo import product_structured_data, store_structured_data
 
 PAGE_SIZE = 12
 
@@ -31,6 +32,7 @@ def home(request):
         "brands": Brand.objects.all(),
         "selected_category": category_slug,
         "selected_brand": brand_slug,
+        "structured_data": store_structured_data(),
     }
     return render(request, "catalog/home.html", context)
 
@@ -45,4 +47,8 @@ def product_detail(request, slug):
         .exclude(pk=product.pk)
         .select_related("brand")[:4]
     )
-    return render(request, "catalog/product_detail.html", {"product": product, "related": related})
+    return render(request, "catalog/product_detail.html", {
+        "product": product,
+        "related": related,
+        "structured_data": product_structured_data(product),
+    })

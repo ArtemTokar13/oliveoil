@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sitemaps",
     "core",
     "catalog",
     "cart",
@@ -39,6 +40,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "core.middleware.CanonicalHostMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -136,6 +138,9 @@ GA_MEASUREMENT_ID = env("GA_MEASUREMENT_ID", default="")
 # the taxpayer's own name, not the brand. Update SITE_PHONE if/when a real
 # contact number is available. Used on the "Aviso legal" and in the footer.
 SITE_NAME = "Olivarium"
+# The one public address of the shop — canonical tags, sitemap, Open Graph
+# and structured data all point here, and www.* redirects to it.
+SITE_URL = env.str("SITE_URL", default="https://olivarium.es").rstrip("/")
 SITE_LEGAL_NAME = "Oleksandra Tokar"
 SITE_NIF = "Y5241607J"
 SITE_ADDRESS = "Calle Botànic Cavanilles, 46, Esc. 4, Planta 3, Pta. L, 12006 Castellón de la Plana (Castellón), España"

@@ -1,6 +1,9 @@
+import json
 from decimal import Decimal, InvalidOperation
 
 from django import template
+from django.core.serializers.json import DjangoJSONEncoder
+from django.utils.safestring import mark_safe
 
 register = template.Library()
 
@@ -35,3 +38,12 @@ def get_range(value):
     except (TypeError, ValueError):
         return []
     return range(1, max(value, 1) + 1)
+
+
+@register.filter
+def jsonld(value):
+    """Serialize a dict for <script type="application/ld+json">, escaping
+    <, > and & so text from the catalog can never close the script tag."""
+    data = json.dumps(value, cls=DjangoJSONEncoder, ensure_ascii=False)
+    data = data.replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
+    return mark_safe(data)
