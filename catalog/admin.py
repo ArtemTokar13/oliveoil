@@ -104,6 +104,6 @@ class ProductAdmin(admin.ModelAdmin):
         return "—"
 
 
-admin.site.site_header = "Olivarium — Administración"
-admin.site.site_title = "Olivarium"
+admin.site.site_header = "Panilla — Administración"
+admin.site.site_title = "Panilla"
 admin.site.index_title = "Panel de gestión"

@@ -1,4 +1,4 @@
-# Olivarium
+# Panilla
 
 Tienda online de aceite de oliva español. Django + PostgreSQL + Stripe Checkout +
 plantillas server-rendered con Tailwind CSS y Alpine.js.

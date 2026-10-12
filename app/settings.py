@@ -109,7 +109,7 @@ EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="Aceite de Oliva <no-reply@example.com>")
-CONTACT_EMAIL = env("CONTACT_EMAIL", default="info@olivarium.es")
+CONTACT_EMAIL = env("CONTACT_EMAIL", default="info@panilla.es")
 # Who gets the "new paid order" notification.
 ORDER_NOTIFICATION_EMAILS = env.list("ORDER_NOTIFICATION_EMAILS", default=["olivarium.castellon@gmail.com"])
 
@@ -132,15 +132,16 @@ GOOGLE_OAUTH_CLIENT_SECRET = env("GOOGLE_OAUTH_CLIENT_SECRET", default="")
 GA_MEASUREMENT_ID = env("GA_MEASUREMENT_ID", default="")
 
 # --- Site / legal identity ----------------------------------------------
-# "Olivarium" is a trade name; the seller of record is a sole trader
+# "Panilla" is a trade name; the seller of record is a sole trader
 # (autónomo), not a company, per the AEAT censal certificate — so there's
 # no Registro Mercantil entry (that's for companies) and the legal name is
 # the taxpayer's own name, not the brand. Update SITE_PHONE if/when a real
 # contact number is available. Used on the "Aviso legal" and in the footer.
-SITE_NAME = "Olivarium"
+SITE_NAME = "Panilla"
 # The one public address of the shop — canonical tags, sitemap, Open Graph
 # and structured data all point here, and www.* redirects to it.
-SITE_URL = env.str("SITE_URL", default="https://olivarium.es").rstrip("/")
+SITE_URL = env.str("SITE_URL", default="https://panilla.es").rstrip("/")
+LEGACY_HOSTS = env.list("LEGACY_HOSTS", default=["olivarium.es", "www.olivarium.es"])
 SITE_LEGAL_NAME = "Oleksandra Tokar"
 SITE_NIF = "Y5241607J"
 SITE_ADDRESS = "Calle Botànic Cavanilles, 46, Esc. 4, Planta 3, Pta. L, 12006 Castellón de la Plana (Castellón), España"
