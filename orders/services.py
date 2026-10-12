@@ -51,8 +51,12 @@ def find_discount_code(raw_code, email=None):
         return None, "Este código de descuento ya se ha utilizado."
     if discount_code.is_expired:
         return None, "Este código de descuento ha caducado."
-    if email is not None and discount_code.email != email.strip().lower():
-        return None, "Este código pertenece a otro cliente: solo es válido con el correo al que se envió."
+    if email is not None:
+        if discount_code.is_public:
+            if discount_code.used_by(email):
+                return None, "Ya has utilizado este código de descuento con este correo."
+        elif discount_code.email != email.strip().lower():
+            return None, "Este código pertenece a otro cliente: solo es válido con el correo al que se envió."
     return discount_code, None
 
 
@@ -176,8 +180,12 @@ def issue_loyalty_code(order):
 
 
 def mark_discount_code_used(order):
+    # Public codes stay open for other customers; their per-email use is
+    # read straight off the paid orders (DiscountCode.used_by).
     if order.discount_code_id:
-        DiscountCode.objects.filter(pk=order.discount_code_id, used_at__isnull=True).update(used_at=timezone.now())
+        DiscountCode.objects.filter(
+            pk=order.discount_code_id, used_at__isnull=True,
+        ).exclude(email="").update(used_at=timezone.now())
 
 
 def send_order_confirmation_email(request, order, loyalty_code=None):

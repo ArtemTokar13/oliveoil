@@ -1,0 +1,29 @@
+{% extends "admin/base_site.html" %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">Inicio</a> › {{ title }}
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <form method="get" class="module aligned" style="max-width: 640px; padding: 16px;">
+    {% if error %}<p class="errornote">{{ error }}</p>{% endif %}
+    <div class="form-row">
+      <label for="qr-url" class="required">URL</label>
+      <input type="url" name="url" id="qr-url" value="{{ url }}" required
+             placeholder="https://olivarium.es/?utm_source=ucrafest" class="vTextField" style="width: 100%;">
+    </div>
+    <div class="form-row">
+      <label>Formato</label>
+      <label style="display:inline; float:none; width:auto;"><input type="radio" name="format" value="png" {% if format != "svg" %}checked{% endif %}> PNG</label>
+      &nbsp;
+      <label style="display:inline; float:none; width:auto;"><input type="radio" name="format" value="svg" {% if format == "svg" %}checked{% endif %}> SVG (vectorial, mejor para imprenta)</label>
+    </div>
+    <div class="submit-row" style="margin-top: 12px;">
+      <input type="submit" value="DESCARGAR" class="default">
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,6 +1,13 @@
+import io
+
+import qrcode
+import qrcode.image.svg
 from django.contrib import admin, messages
+from django.core.exceptions import ValidationError
+from django.core.validators import URLValidator
+from django.http import HttpResponse
 from django.template.response import TemplateResponse
-from django.urls import reverse
+from django.urls import path, reverse
 from django.utils.html import format_html
 
 from .models import Customer, DiscountCode, Order, OrderItem, ShippingSettings
@@ -181,6 +188,8 @@ class DiscountCodeAdmin(admin.ModelAdmin):
 
     @admin.display(description="Estado")
     def state(self, obj):
+        if obj.is_public:
+            return "⌛ Caducado" if obj.is_expired else "🟢 Público"
         if obj.is_used:
             return "✅ Usado"
         if obj.is_expired:
@@ -196,11 +205,67 @@ class DiscountCodeAdmin(admin.ModelAdmin):
 
     @admin.display(description="Usado en")
     def used_in(self, obj):
+        if obj.is_public:
+            count = obj.orders.filter(status=Order.Status.PAID).count()
+            url = reverse("admin:orders_order_changelist") + f"?discount_code__exact={obj.pk}"
+            return format_html('<a href="{}">{} pedido(s)</a>', url, count)
         order = obj.orders.filter(status=Order.Status.PAID).first()
         if not order:
             return "—"
         url = reverse("admin:orders_order_change", args=[order.pk])
         return format_html('<a href="{}">#{}</a>', url, order.order_number)
+
+
+QR_FORMATS = {"png": "image/png", "svg": "image/svg+xml"}
+
+
+def qr_code_view(request):
+    """Admin tool: type a URL, download its QR code (PNG for screens, SVG —
+    vector, sharp at any size — for print, e.g. a flyer)."""
+    url = request.GET.get("url", "").strip()
+    fmt = request.GET.get("format", "png")
+    error = None
+    if url:
+        try:
+            URLValidator(schemes=["http", "https"])(url)
+        except ValidationError:
+            error = "Introduce una URL válida que empiece por http:// o https://"
+        if fmt not in QR_FORMATS:
+            fmt = "png"
+        if not error:
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.constants.ERROR_CORRECT_L,
+                box_size=12,
+                border=2,
+            )
+            qr.add_data(url)
+            # version=1 only fits ~25 characters — let longer URLs grow it.
+            qr.make(fit=True)
+            image_factory = qrcode.image.svg.SvgPathImage if fmt == "svg" else None
+            buffer = io.BytesIO()
+            qr.make_image(image_factory=image_factory).save(buffer)
+            response = HttpResponse(buffer.getvalue(), content_type=QR_FORMATS[fmt])
+            response["Content-Disposition"] = f'attachment; filename="qr-code.{fmt}"'
+            return response
+    context = {
+        **admin.site.each_context(request),
+        "title": "Generar código QR",
+        "url": url,
+        "format": fmt,
+        "error": error,
+    }
+    return TemplateResponse(request, "admin/qr_code.html", context)
+
+
+_original_get_urls = admin.site.get_urls
+
+
+def _get_urls():
+    return [path("qr/", admin.site.admin_view(qr_code_view), name="qr_code")] + _original_get_urls()
+
+
+admin.site.get_urls = _get_urls
 
 
 @admin.register(Customer)

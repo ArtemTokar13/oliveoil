@@ -234,13 +234,21 @@ def _default_discount_expiry():
 
 
 class DiscountCode(models.Model):
-    """Single-use, percentage-off-products code tied to one customer email.
-    Issued automatically after every paid order ("X % en tu próxima compra")
-    and can also be created by hand in the admin."""
+    """Percentage-off-products code. Two flavours:
+    - personal (email set): single-use, only for that customer. Issued
+      automatically after every paid order ("X % en tu próxima compra").
+    - public (email blank): a campaign code like a festival flyer's — any
+      customer can use it, once per email."""
 
     code = models.CharField("código", max_length=20, unique=True, blank=True,
                             help_text="Déjalo en blanco para generarlo automáticamente.")
-    email = models.EmailField("correo del cliente", help_text="Solo se puede usar en pedidos con este correo.")
+    email = models.EmailField(
+        "correo del cliente", blank=True,
+        help_text=(
+            "Solo se puede usar en pedidos con este correo. Déjalo en blanco para un código "
+            "público (p. ej. de un folleto): válido para cualquier cliente, una vez por correo."
+        ),
+    )
     percent = models.DecimalField("descuento (%)", max_digits=5, decimal_places=2,
                                   default=Decimal("5"))
     expires_at = models.DateTimeField("válido hasta", default=_default_discount_expiry)
@@ -267,8 +275,16 @@ class DiscountCode(models.Model):
         super().save(*args, **kwargs)
 
     @property
+    def is_public(self):
+        return not self.email
+
+    @property
     def is_used(self):
+        # Public codes are never "used up" — only per customer (see used_by).
         return self.used_at is not None
+
+    def used_by(self, email):
+        return self.orders.filter(status=Order.Status.PAID, email__iexact=email.strip()).exists()
 
     @property
     def is_expired(self):

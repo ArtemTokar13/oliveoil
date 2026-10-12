@@ -108,6 +108,13 @@
         <tr><td colspan="2"><a href="{% url 'admin:orders_customer_changelist' %}">Ver clientes →</a> · <a href="{% url 'admin:orders_discountcode_changelist' %}">Ver códigos →</a></td></tr>
       </table>
     </div>
+
+    <div class="module">
+      <table>
+        <caption>Herramientas</caption>
+        <tr><td><a href="{% url 'admin:qr_code' %}">Generar código QR →</a></td></tr>
+      </table>
+    </div>
   </div>
 </div>
 {{ block.super }}
