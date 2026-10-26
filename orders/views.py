@@ -55,6 +55,11 @@ def checkout(request):
     # No @login_required — purchasing must never force an account. Guests
     # type a one-off shipping address + email; the email is what the order
     # status link gets sent to, since there's no account to log into later.
+    # Coming from the cart page means the cart is what's being bought — drop
+    # any stale "buy now" intent left over from an abandoned checkout. (The
+    # form has no action, so ?from=cart survives the POST as well.)
+    if request.GET.get("from") == "cart":
+        request.session.pop("buy_now", None)
     line_items = build_line_items(request)
     if not line_items:
         messages.info(request, "Tu carrito está vacío.")

@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% load shop_extras %}
 
+{% block title %}Aceite de oliva virgen extra en Castellón · {{ SITE_NAME }}{% endblock %}
+{% block og_title %}Aceite de oliva virgen extra en Castellón · {{ SITE_NAME }}{% endblock %}
 {% block og_image %}{% with image=products.0.main_image %}{% if image %}
   <meta property="og:image" content="{{ SITE_URL }}{{ image.image.url }}">{% endif %}{% endwith %}
 {% endblock %}
@@ -13,9 +15,9 @@
   <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <p class="font-mono text-xs uppercase tracking-[0.2em] text-accent">Aceite de oliva español</p>
+        <p class="font-mono text-xs uppercase tracking-[0.2em] text-accent">Seleccionado, cosecha a cosecha</p>
         <h1 class="mt-2 font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
-          Aceite seleccionado, cosecha a cosecha
+          Aceite de oliva de Castellón y de toda España
         </h1>
         <p class="mt-2 max-w-xl text-ink-muted">
           Trabajamos con productores y cooperativas de distintas regiones de España para

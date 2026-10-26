@@ -81,7 +81,7 @@ class ProductAdmin(admin.ModelAdmin):
         "price", "stock", "is_active", "harvest_year",
     )
     list_display_links = ("thumbnail", "name")
-    list_filter = ("is_active", StockFilter, "brand", "category", "volume")
+    list_filter = ("is_active", StockFilter, "brand", "category", "variety", "volume")
     actions = [make_active, make_inactive]
     search_fields = ("name", "brand__name", "origin_region")
     list_editable = ("price", "stock", "is_active")
@@ -91,7 +91,7 @@ class ProductAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {"fields": ("name", "slug", "brand", "category", "is_active")}),
         ("Detalles del producto", {
-            "fields": ("volume", "origin_region", "harvest_year", "acidity", "description"),
+            "fields": ("volume", "origin_region", "variety", "harvest_year", "acidity", "description"),
         }),
         ("Precio y stock", {"fields": ("price", "stock")}),
     )

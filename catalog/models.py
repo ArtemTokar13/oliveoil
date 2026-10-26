@@ -56,6 +56,10 @@ class Product(models.Model):
         L3 = "3L", "3 L"
         L5 = "5L", "5 L"
 
+    class Variety(models.TextChoices):
+        SERRANA_ESPADAN = "SERRANA_ESPADAN", "Serrana de Espadán"
+        PICUAL = "PICUAL", "Picual"
+
     name = models.CharField("nombre", max_length=160)
     slug = models.SlugField(max_length=180, unique=True, blank=True)
     brand = models.ForeignKey(
@@ -68,6 +72,10 @@ class Product(models.Model):
     )
     volume = models.CharField("volumen", max_length=10, choices=Volume.choices)
     origin_region = models.CharField("origen / región", max_length=120, blank=True)
+    variety = models.CharField(
+        "variedad predominante", max_length=20, choices=Variety.choices, blank=True,
+        help_text="Variedad de aceituna mayoritaria. Déjalo en blanco si no se conoce.",
+    )
     harvest_year = models.CharField("cosecha", max_length=9, blank=True, null=True)
     acidity = models.DecimalField(
         "acidez (%)", max_digits=4, decimal_places=2, blank=True, null=True,

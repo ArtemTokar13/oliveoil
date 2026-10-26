@@ -86,6 +86,12 @@
             <dd class="mt-0.5 font-medium text-ink">{{ product.origin_region }}</dd>
           </div>
         {% endif %}
+        {% if product.variety %}
+          <div>
+            <dt class="text-ink-muted">Variedad</dt>
+            <dd class="mt-0.5 font-medium text-ink">{{ product.get_variety_display }}</dd>
+          </div>
+        {% endif %}
         {% if product.harvest_year %}
           <div>
             <dt class="text-ink-muted">Cosecha</dt>

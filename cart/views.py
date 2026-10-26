@@ -28,6 +28,9 @@ def add(request):
     except (TypeError, ValueError):
         quantity = 1
 
+    # Adding to the cart supersedes any abandoned "buy now" checkout.
+    request.session.pop("buy_now", None)
+
     current_cart = get_cart(request)
     item, created = CartItem.objects.get_or_create(
         cart=current_cart, product=product, defaults={"quantity": quantity},

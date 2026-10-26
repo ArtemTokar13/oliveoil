@@ -68,18 +68,27 @@ def product_structured_data(product):
     }
     if product.brand:
         data["brand"] = {"@type": "Brand", "name": product.brand.name}
+    if product.variety:
+        data["additionalProperty"] = [
+            {"@type": "PropertyValue", "name": "Variedad de aceituna", "value": product.get_variety_display()},
+        ]
     if not data["image"]:
         del data["image"]
 
-    breadcrumbs = {
+    return [data, breadcrumb_structured_data([(product.name, url)])]
+
+
+def breadcrumb_structured_data(crumbs):
+    """BreadcrumbList starting at the shop home, followed by (name, absolute url) pairs."""
+    crumbs = [("Tienda", absolute(reverse("catalog:home")))] + list(crumbs)
+    return {
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
         "itemListElement": [
-            {"@type": "ListItem", "position": 1, "name": "Tienda", "item": absolute(reverse("catalog:home"))},
-            {"@type": "ListItem", "position": 2, "name": product.name, "item": url},
+            {"@type": "ListItem", "position": position, "name": name, "item": url}
+            for position, (name, url) in enumerate(crumbs, start=1)
         ],
     }
-    return [data, breadcrumbs]
 
 
 def store_structured_data():

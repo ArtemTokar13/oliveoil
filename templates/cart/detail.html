@@ -57,7 +57,7 @@
         <span class="price font-semibold text-ink">{{ cart.subtotal|eur }}</span>
       </div>
       <p class="text-sm text-ink-muted">Los gastos de envío se calculan en el checkout.</p>
-      <a href="{% url 'orders:checkout' %}" class="btn-primary">Finalizar compra</a>
+      <a href="{% url 'orders:checkout' %}?from=cart" class="btn-primary">Finalizar compra</a>
     </div>
   {% else %}
     <div class="mt-10 border border-dashed border-border px-6 py-16 text-center">
