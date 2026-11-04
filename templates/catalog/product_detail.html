@@ -2,16 +2,16 @@
 {% load l10n shop_extras %}
 
 {% block title %}{{ product.name }} {{ product.get_volume_display }} — Comprar online | {{ SITE_NAME }}{% endblock %}
-{% block meta_description %}{{ product.name }} ({{ product.get_volume_display }}){% if product.brand %} de {{ product.brand.name }}{% endif %}, {{ product.price|eur }}. {{ product.description|striptags|truncatewords:22 }}{% endblock %}
+{% block meta_description %}{{ product.name }} ({{ product.get_volume_display }}){% if product.brand %} de {{ product.brand.name }}{% endif %}, {{ product.final_price|eur }}. {{ product.description|striptags|truncatewords:22 }}{% endblock %}
 {% block og_type %}product{% endblock %}
-{% block og_title %}{{ product.name }} ({{ product.get_volume_display }}) — {{ product.price|eur }}{% endblock %}
+{% block og_title %}{{ product.name }} ({{ product.get_volume_display }}) — {{ product.final_price|eur }}{% endblock %}
 {% block og_description %}{{ product.description|striptags|truncatewords:30|default:product.name }}{% endblock %}
 {% block og_image %}{% with image=product.main_image %}{% if image %}
   <meta property="og:image" content="{{ SITE_URL }}{{ image.image.url }}">
   <meta property="og:image:alt" content="{{ image.alt_text|default:product.name }}">{% endif %}{% endwith %}
 {% endblock %}
 {% block og_extra %}
-  <meta property="product:price:amount" content="{{ product.price|unlocalize }}">
+  <meta property="product:price:amount" content="{{ product.final_price|unlocalize }}">
   <meta property="product:price:currency" content="EUR">
 {% endblock %}
 {% block structured_data %}{% for item in structured_data %}
@@ -29,7 +29,7 @@
   <div class="grid gap-10 lg:grid-cols-2">
 
     <div x-data="{ active: 0 }">
-      <div class="aspect-[3/4] border border-border bg-surface-2">
+      <div class="relative aspect-[3/4] border border-border bg-surface-2">
         {% with images=product.images.all %}
           {% if images %}
             {% for image in images %}
@@ -43,6 +43,12 @@
             </div>
           {% endif %}
         {% endwith %}
+        {% if product.has_discount %}
+          {% include "catalog/_discount_ribbon.html" with extra_class="max-w-[55%]" %}
+        {% endif %}
+        {% if product.badge_text %}
+          <span class="ribbon ribbon-label max-w-[40%]">{{ product.badge_text }}</span>
+        {% endif %}
       </div>
       {% if product.images.all|length > 1 %}
         <div class="mt-3 flex gap-2">
@@ -63,7 +69,10 @@
       <h1 class="mt-1 font-display text-3xl font-semibold tracking-tight text-ink">{{ product.name }}</h1>
 
       <div class="mt-3 flex items-center gap-3">
-        <p class="price text-2xl font-medium text-ink">{{ product.price|eur }}</p>
+        <p class="price text-2xl font-medium text-ink">{{ product.final_price|eur }}</p>
+        {% if product.has_discount %}
+          <del class="price text-base text-ink-muted">{{ product.price|eur }}</del>
+        {% endif %}
         {% if product.in_stock %}
           <span class="badge border-accent-2 text-accent-2">En stock</span>
         {% else %}
@@ -150,6 +159,13 @@
             Comprar ahora
           </button>
         </form>
+
+        {% if shipping_settings.has_local_delivery %}
+          <p class="text-sm text-accent-2">
+            Entrega gratis en Castellón y alrededores cada {{ shipping_settings.get_local_delivery_weekday_display|lower }}.
+            <a href="{% url 'pages:shipping_returns' %}" class="underline hover:text-accent">Ver zona de reparto</a>
+          </p>
+        {% endif %}
       </div>
     </div>
   </div>

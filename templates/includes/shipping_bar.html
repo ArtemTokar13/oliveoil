@@ -1,0 +1,6 @@
+{% load shop_extras %}
+{% with shipping=shipping_settings %}
+<a href="{% url 'pages:shipping_returns' %}" class="block bg-accent-2 px-4 py-1.5 text-center text-xs text-bg hover:underline sm:text-sm">
+  {% if shipping.has_local_delivery %}<span class="block sm:inline">Entrega gratis en Castellón y alrededores cada {{ shipping.get_local_delivery_weekday_display|lower }}</span><span class="hidden sm:inline"> · </span><span class="block sm:inline">Resto de España: {% else %}<span class="block sm:inline">Envíos a toda España: {% endif %}{{ shipping.flat_fee|eur_short }}{% if shipping.free_shipping_threshold %} (gratis en pedidos de más de {{ shipping.free_shipping_threshold|eur_short }}){% endif %}</span>
+</a>
+{% endwith %}

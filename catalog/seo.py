@@ -26,7 +26,7 @@ def product_structured_data(product):
     url = absolute(product.get_absolute_url())
     shipping = ShippingSettings.get_solo()
     threshold = shipping.free_shipping_threshold
-    shipping_fee = 0 if threshold is not None and product.price >= threshold else shipping.flat_fee
+    shipping_fee = 0 if threshold is not None and product.final_price >= threshold else shipping.flat_fee
 
     description = product.description.strip() or f"{product.name}, {product.get_volume_display()}."
     data = {
@@ -42,7 +42,7 @@ def product_structured_data(product):
             "@type": "Offer",
             "url": url,
             "priceCurrency": "EUR",
-            "price": str(product.price),
+            "price": str(product.final_price),
             "availability": "https://schema.org/InStock" if product.in_stock else "https://schema.org/OutOfStock",
             "itemCondition": "https://schema.org/NewCondition",
             "seller": {"@type": "Organization", "name": settings.SITE_NAME},

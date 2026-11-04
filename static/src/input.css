@@ -97,4 +97,16 @@
   .badge {
     @apply inline-flex items-center border border-current px-2 py-0.5 text-xs font-medium uppercase tracking-wider;
   }
+
+  .ribbon {
+    @apply absolute top-3 z-10 max-w-[85%] px-2.5 py-1 text-xs leading-snug;
+  }
+
+  .ribbon-sale {
+    @apply left-0 bg-red-600 text-white;
+  }
+
+  .ribbon-label {
+    @apply right-0 bg-accent-2 text-sm font-semibold tracking-wide text-bg sm:text-base;
+  }
 }

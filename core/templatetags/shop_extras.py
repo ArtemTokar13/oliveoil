@@ -31,6 +31,12 @@ def eur(value):
 
 
 @register.filter
+def eur_short(value):
+    """Like `eur` but dropping empty cents, for running text: 5.00 -> '5 €'."""
+    return str(eur(value)).replace(",00 €", " €")
+
+
+@register.filter
 def get_range(value):
     """Return range(1, value + 1) for building quantity <select> options."""
     try:

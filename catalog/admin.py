@@ -78,13 +78,13 @@ def make_inactive(modeladmin, request, queryset):
 class ProductAdmin(admin.ModelAdmin):
     list_display = (
         "thumbnail", "name", "brand", "category", "volume",
-        "price", "stock", "is_active", "harvest_year",
+        "price", "discount_percent", "stock", "is_active", "position", "harvest_year",
     )
     list_display_links = ("thumbnail", "name")
     list_filter = ("is_active", StockFilter, "brand", "category", "variety", "volume")
     actions = [make_active, make_inactive]
     search_fields = ("name", "brand__name", "origin_region")
-    list_editable = ("price", "stock", "is_active")
+    list_editable = ("price", "discount_percent", "stock", "is_active", "position")
     prepopulated_fields = {"slug": ("name",)}
     autocomplete_fields = ("brand",)
     inlines = [ProductImageInline]
@@ -93,7 +93,8 @@ class ProductAdmin(admin.ModelAdmin):
         ("Detalles del producto", {
             "fields": ("volume", "origin_region", "variety", "harvest_year", "acidity", "description"),
         }),
-        ("Precio y stock", {"fields": ("price", "stock")}),
+        ("Precio y stock", {"fields": ("price", "discount_percent", "discount_note", "stock")}),
+        ("Escaparate", {"fields": ("position", "badge_text")}),
     )
 
     @admin.display(description="")

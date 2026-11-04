@@ -72,7 +72,7 @@ def create_order(request, shipping_fields, email, discount_code=None):
         if quantity > product.stock:
             raise CheckoutError(f"No queda stock suficiente de «{product.name}».")
 
-    subtotal = sum((product.price * quantity for product, quantity in line_items), start=Decimal("0"))
+    subtotal = sum((product.final_price * quantity for product, quantity in line_items), start=Decimal("0"))
     shipping_settings = ShippingSettings.get_solo()
     postal_code = shipping_fields["postal_code"]
     # Free-shipping threshold is judged on the pre-discount subtotal, so a
@@ -105,7 +105,7 @@ def create_order(request, shipping_fields, email, discount_code=None):
     for product, quantity in line_items:
         OrderItem.objects.create(
             order=order, product=product, product_name=product.name,
-            product_volume=product.get_volume_display(), unit_price=product.price,
+            product_volume=product.get_volume_display(), unit_price=product.final_price,
             quantity=quantity,
         )
     return order

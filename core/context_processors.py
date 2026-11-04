@@ -1,4 +1,7 @@
 from django.conf import settings
+from django.utils.functional import SimpleLazyObject
+
+from orders.models import ShippingSettings
 
 
 # Apps whose pages are private or transactional — kept out of search results.
@@ -9,6 +12,7 @@ def site(request):
     match = getattr(request, "resolver_match", None)
     return {
         "SITE_URL": settings.SITE_URL,
+        "shipping_settings": SimpleLazyObject(ShippingSettings.get_solo),
         "NOINDEX": bool(match and match.app_name in NOINDEX_APPS),
         "SITE_NAME": settings.SITE_NAME,
         "SITE_LEGAL_NAME": settings.SITE_LEGAL_NAME,

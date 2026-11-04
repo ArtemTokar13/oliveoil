@@ -166,7 +166,7 @@ def checkout(request):
                 request.session.pop("buy_now", None)
                 return redirect(session.url)
 
-    subtotal = sum((product.price * quantity for product, quantity in line_items), start=Decimal("0"))
+    subtotal = sum((product.final_price * quantity for product, quantity in line_items), start=Decimal("0"))
     discount_amount = discount_code.discount_for(subtotal) if discount_code else Decimal("0")
     shipping_settings = ShippingSettings.get_solo()
     default_address = next((a for a in addresses if a.is_default), None) or (addresses[0] if addresses else None)
@@ -189,7 +189,7 @@ def checkout(request):
     return render(request, "orders/checkout.html", {
         "addresses": addresses,
         "line_items": line_items,
-        "summary_items": [(product, quantity, product.price * quantity) for product, quantity in line_items],
+        "summary_items": [(product, quantity, product.final_price * quantity) for product, quantity in line_items],
         "subtotal": subtotal,
         "discount_code": discount_code,
         "discount_amount": discount_amount,

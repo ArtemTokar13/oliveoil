@@ -1,7 +1,9 @@
 import io
 import os
+from decimal import ROUND_HALF_UP, Decimal
 
 from django.core.files.base import ContentFile
+from django.core.validators import MaxValueValidator
 from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
@@ -81,6 +83,25 @@ class Product(models.Model):
         "acidez (%)", max_digits=4, decimal_places=2, blank=True, null=True,
     )
     price = models.DecimalField("precio (€)", max_digits=8, decimal_places=2)
+    discount_percent = models.PositiveSmallIntegerField(
+        "descuento (%)", default=0, validators=[MaxValueValidator(90)],
+        help_text="Se resta del precio en toda la tienda, incluido el cobro. 0 = sin descuento.",
+    )
+    discount_note = models.CharField(
+        "comentario del descuento", max_length=30, blank=True,
+        help_text="Opcional, se muestra junto al descuento. P. ej. «Oferta de lanzamiento».",
+    )
+    badge_text = models.CharField(
+        "etiqueta", max_length=20, blank=True,
+        help_text=(
+            "Opcional, p. ej. «Nueva cosecha». En el listado de la tienda solo se ve si el "
+            "producto no tiene descuento; en su ficha se ve siempre."
+        ),
+    )
+    position = models.PositiveSmallIntegerField(
+        "orden", default=100,
+        help_text="Los números más bajos aparecen primero en la tienda. A igual orden, los más nuevos primero.",
+    )
     stock = models.PositiveIntegerField("stock", default=0)
     description = models.TextField("descripción", blank=True)
     is_active = models.BooleanField("activo", default=True, help_text="Desmarca para ocultar el producto de la tienda sin borrarlo.")
@@ -90,7 +111,7 @@ class Product(models.Model):
     class Meta:
         verbose_name = "producto"
         verbose_name_plural = "productos"
-        ordering = ["-created_at"]
+        ordering = ["position", "-created_at"]
 
     def __str__(self):
         return f"{self.name} ({self.get_volume_display()})"
@@ -112,6 +133,17 @@ class Product(models.Model):
     @property
     def in_stock(self):
         return self.stock > 0
+
+    @property
+    def has_discount(self):
+        return self.discount_percent > 0
+
+    @property
+    def final_price(self):
+        """What the customer pays — `price` stays the regular, pre-discount one."""
+        if not self.has_discount:
+            return self.price
+        return (self.price * (100 - self.discount_percent) / 100).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     @property
     def main_image(self):

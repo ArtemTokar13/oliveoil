@@ -24,7 +24,7 @@
                 {{ item.product.name }}
               </a>
               <p class="text-sm text-ink-muted">{{ item.product.get_volume_display }}</p>
-              <p class="price mt-1 text-sm text-ink-muted">{{ item.product.price|eur }} / ud.</p>
+              <p class="price mt-1 text-sm text-ink-muted">{% if item.product.has_discount %}<del>{{ item.product.price|eur }}</del> {% endif %}{{ item.product.final_price|eur }} / ud.</p>
             </div>
           </div>
 

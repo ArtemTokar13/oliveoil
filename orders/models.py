@@ -61,6 +61,10 @@ class ShippingSettings(models.Model):
         obj, _ = cls.objects.get_or_create(pk=1)
         return obj
 
+    @property
+    def has_local_delivery(self):
+        return self.local_delivery_weekday is not None and bool(self.local_delivery_postal_code_list())
+
     def local_delivery_postal_code_list(self):
         return [code.strip() for code in self.local_delivery_postal_codes.split(",") if code.strip()]
 

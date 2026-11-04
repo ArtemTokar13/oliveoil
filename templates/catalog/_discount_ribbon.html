@@ -1,0 +1,4 @@
+<span class="ribbon ribbon-sale {{ extra_class }}">
+  <span class="price block text-base font-bold sm:text-lg">−{{ product.discount_percent }} %</span>
+  {% if product.discount_note %}<span class="{{ note_class|default:"block" }} font-normal">{{ product.discount_note }}</span>{% endif %}
+</span>

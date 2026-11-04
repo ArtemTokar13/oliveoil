@@ -1,6 +1,6 @@
 {% load shop_extras %}
 <a href="{{ product.get_absolute_url }}" class="group block">
-  <div class="aspect-[3/4] overflow-hidden border border-border bg-surface-2">
+  <div class="relative aspect-[3/4] overflow-hidden border border-border bg-surface-2">
     {% with image=product.main_image %}
       {% if image %}
         <img src="{{ image.image.url }}" alt="{{ image.alt_text|default:product.name }}"
@@ -11,6 +11,12 @@
         </div>
       {% endif %}
     {% endwith %}
+    {# One banner at most per card: the grid gets busy fast, and a discount is the one that changes the decision. On phones the note waits for the product page. #}
+    {% if product.has_discount %}
+      {% include "catalog/_discount_ribbon.html" with note_class="hidden sm:block" %}
+    {% elif product.badge_text %}
+      <span class="ribbon ribbon-label">{{ product.badge_text }}</span>
+    {% endif %}
   </div>
   <div class="mt-3 flex items-start justify-between gap-2">
     <div class="min-w-0">
@@ -20,7 +26,12 @@
       <h2 class="truncate font-display text-base font-medium text-ink group-hover:text-accent">{{ product.name }}</h2>
       <p class="text-sm text-ink-muted">{{ product.category.name }} · {{ product.get_volume_display }}</p>
     </div>
-    <p class="price shrink-0 text-base font-medium text-ink">{{ product.price|eur }}</p>
+    <div class="shrink-0 text-right">
+      <p class="price text-base font-medium text-ink">{{ product.final_price|eur }}</p>
+      {% if product.has_discount %}
+        <del class="price block text-xs text-ink-muted">{{ product.price|eur }}</del>
+      {% endif %}
+    </div>
   </div>
   {% if not product.in_stock %}
     <p class="badge mt-2 border-ink-muted text-ink-muted">Agotado</p>
